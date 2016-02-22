@@ -66,7 +66,7 @@ namespace cb_downloader_v2
             
 
             // Create process and add listener to lists
-            LivestreamerProcess proc = new LivestreamerProcess(modelName);
+            LivestreamerProcess proc = new LivestreamerProcess(this, modelName);
             modelsBox.Items.Add(modelName);
             _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
         }
@@ -209,6 +209,20 @@ namespace cb_downloader_v2
             if (e.KeyCode == Keys.Enter && modelNameTextBox.Text.Length > 0)
             {
                 e.Handled = e.SuppressKeyPress = true;
+            }
+        }
+
+        public void SetCheckState(string modelName, CheckState state)
+        {
+            for (int i = 0; i < modelsBox.Items.Count; i++)
+            {
+                var item = modelsBox.Items[i];
+
+                // Locating item with given name
+                if (!item.Equals(modelName))
+                    continue;
+                modelsBox.SetItemCheckState(i, state);
+                return;
             }
         }
     }

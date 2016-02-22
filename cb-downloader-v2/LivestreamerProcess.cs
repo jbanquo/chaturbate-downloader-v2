@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace cb_downloader_v2
 {
@@ -10,6 +11,7 @@ namespace cb_downloader_v2
         private const string CommandArguments = "chaturbate.com/{0} {1} -o " + MainForm.OutputFolderName + "/{0}-{2}-{3}.flv";
         private const string Quality = "best";
         private const int RestartDelay = 30 * 1000;
+        private readonly MainForm _mf;
         private readonly string _modelName;
         private int _fileNumber = 1;
         private Process _process;
@@ -19,8 +21,9 @@ namespace cb_downloader_v2
         public bool InvalidUrlDetected { get; private set; }
         public int RestartTime { get; private set; }
 
-        public LivestreamerProcess(string modelName)
+        public LivestreamerProcess(MainForm parent, string modelName)
         {
+            _mf = parent;
             _modelName = modelName;
         }
 
@@ -51,6 +54,7 @@ namespace cb_downloader_v2
             _fileNumber++;
             _process.OutputDataReceived += _process_OutputDataReceived;
             _process.Start();
+            _mf.SetCheckState(_modelName, CheckState.Checked);
 
 #if DEBUG
             Debug.WriteLine(_fileNumber == 1 ? "[{0}] Started #{1}" : "[{0}] Restarted #{1}", _modelName, _fileNumber);
@@ -76,6 +80,7 @@ namespace cb_downloader_v2
                 RestartRequired = true;
                 RestartTime = 0;
                 Terminate();
+                _mf.SetCheckState(_modelName, CheckState.Unchecked);
             }
 
             // Checking if the username is invalid
@@ -87,6 +92,7 @@ namespace cb_downloader_v2
 
                 // Terminating the thread and marking as invalid url
                 InvalidUrlDetected = true;
+                _mf.SetCheckState(_modelName, CheckState.Unchecked);
                 Terminate();
             }
 
@@ -100,6 +106,7 @@ namespace cb_downloader_v2
                 // Terminating the thread and marking for a delayed restart
                 RestartRequired = true;
                 RestartTime = Environment.TickCount + RestartDelay;
+                _mf.SetCheckState(_modelName, CheckState.Unchecked);
                 Terminate();
             }
         }
