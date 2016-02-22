@@ -28,15 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.modelsBox = new System.Windows.Forms.CheckedListBox();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
             this.addModelButton = new System.Windows.Forms.Button();
+            this.modelsBoxCtxMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.removeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsGroupBox.SuspendLayout();
+            this.modelsBoxCtxMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // modelsBox
             // 
+            this.modelsBox.ContextMenuStrip = this.modelsBoxCtxMenu;
             this.modelsBox.FormattingEnabled = true;
             this.modelsBox.Location = new System.Drawing.Point(6, 19);
             this.modelsBox.Name = "modelsBox";
@@ -72,6 +77,21 @@
             this.addModelButton.UseVisualStyleBackColor = true;
             this.addModelButton.Click += new System.EventHandler(this.addModelButton_Click);
             // 
+            // modelsBoxCtxMenu
+            // 
+            this.modelsBoxCtxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeMenuItem});
+            this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
+            this.modelsBoxCtxMenu.ShowImageMargin = false;
+            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(93, 26);
+            // 
+            // removeMenuItem
+            // 
+            this.removeMenuItem.Name = "removeMenuItem";
+            this.removeMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.removeMenuItem.Text = "Remove";
+            this.removeMenuItem.Click += new System.EventHandler(this.removeMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -85,6 +105,7 @@
             this.Text = "cb-downloader-2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.modelsGroupBox.ResumeLayout(false);
+            this.modelsBoxCtxMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -96,6 +117,8 @@
         private System.Windows.Forms.GroupBox modelsGroupBox;
         private System.Windows.Forms.TextBox modelNameTextBox;
         private System.Windows.Forms.Button addModelButton;
+        private System.Windows.Forms.ContextMenuStrip modelsBoxCtxMenu;
+        private System.Windows.Forms.ToolStripMenuItem removeMenuItem;
     }
 }
 

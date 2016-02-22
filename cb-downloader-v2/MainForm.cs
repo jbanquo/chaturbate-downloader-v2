@@ -215,5 +215,27 @@ namespace cb_downloader_v2
                 return;
             }
         }
+
+        private void removeMenuItem_Click(object sender, EventArgs e)
+        {
+            int idx = modelsBox.SelectedIndex;
+
+            // Validating item
+            if (idx == -1)
+                return;
+
+            string modelName = modelsBox.Items[idx].ToString();
+
+            // Fetching process
+            LivestreamerProcess listener = _listeners[modelName];
+
+            // Initiating termination
+            listener.Terminate();
+
+            // Removing listener from lists
+            modelsBox.Items.RemoveAt(idx);
+            LivestreamerProcess output;
+            _listeners.TryRemove(modelName, out output);
+        }
     }
 }
