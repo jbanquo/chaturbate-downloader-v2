@@ -28,24 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.modelsBox = new System.Windows.Forms.CheckedListBox();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
             this.addModelButton = new System.Windows.Forms.Button();
             this.modelsGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
-            // checkedListBox1
+            // modelsBox
             // 
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(6, 19);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(387, 259);
-            this.checkedListBox1.TabIndex = 0;
+            this.modelsBox.FormattingEnabled = true;
+            this.modelsBox.Location = new System.Drawing.Point(6, 19);
+            this.modelsBox.Name = "modelsBox";
+            this.modelsBox.Size = new System.Drawing.Size(387, 259);
+            this.modelsBox.TabIndex = 0;
             // 
             // modelsGroupBox
             // 
-            this.modelsGroupBox.Controls.Add(this.checkedListBox1);
+            this.modelsGroupBox.Controls.Add(this.modelsBox);
             this.modelsGroupBox.Location = new System.Drawing.Point(12, 12);
             this.modelsGroupBox.Name = "modelsGroupBox";
             this.modelsGroupBox.Size = new System.Drawing.Size(399, 292);
@@ -59,6 +59,8 @@
             this.modelNameTextBox.Name = "modelNameTextBox";
             this.modelNameTextBox.Size = new System.Drawing.Size(318, 20);
             this.modelNameTextBox.TabIndex = 2;
+            this.modelNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyDown);
+            this.modelNameTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyUp);
             // 
             // addModelButton
             // 
@@ -81,6 +83,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "MainForm";
             this.Text = "cb-downloader-2";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.modelsGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -89,7 +92,7 @@
 
         #endregion
 
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.CheckedListBox modelsBox;
         private System.Windows.Forms.GroupBox modelsGroupBox;
         private System.Windows.Forms.TextBox modelNameTextBox;
         private System.Windows.Forms.Button addModelButton;
