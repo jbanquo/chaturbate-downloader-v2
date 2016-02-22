@@ -36,7 +36,7 @@ namespace cb_downloader_v2
             // TODO check if target file name is already taken and increment file number if necessary // could handle it from process text output to restart it.
             // ...  should also prevent overwrites when doing this.
 
-            // Initialising and starting process
+            // Initialising process
             _process = new Process
             {
                 StartInfo =
@@ -44,21 +44,23 @@ namespace cb_downloader_v2
                     FileName = "livestreamer.exe",
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     Arguments = string.Format(CommandArguments, _modelName, Quality, DateTime.Today.ToString("ddMMyy"), _fileNumber)
                 }
             };
-            RestartRequired = false;
-            InvalidUrlDetected = false;
-            _fileNumber++;
-            _process.OutputDataReceived += _process_OutputDataReceived;
-            _process.Start();
-            _mf.SetCheckState(_modelName, CheckState.Checked);
 
 #if DEBUG
             Debug.WriteLine(_fileNumber == 1 ? "[{0}] Started #{1}" : "[{0}] Restarted #{1}", _modelName, _fileNumber);
 #endif
+
+            // Updating flags and starting process
+            RestartRequired = false;
+            InvalidUrlDetected = false;
+            _process.OutputDataReceived += _process_OutputDataReceived;
+            _process.Start();
+            _process.BeginOutputReadLine();
+            _mf.SetCheckState(_modelName, CheckState.Checked);
+            _fileNumber++;
         }
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)

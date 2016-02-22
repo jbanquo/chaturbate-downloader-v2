@@ -12,6 +12,8 @@ namespace cb_downloader_v2
 {
     public partial class MainForm : Form
     {
+        // TODO play with checkbox stuff until it makes sense - right now its always checked due to how it flows, after initial start of process
+        // TODO dont let user check/uncheck the checkboxes
         private const int ListenerSleepDelay = 5 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
@@ -63,7 +65,6 @@ namespace cb_downloader_v2
             // Checking if the model is already being listened to
             if (modelsBox.Items.Cast<object>().Contains(modelName))
                 return;
-            
 
             // Create process and add listener to lists
             LivestreamerProcess proc = new LivestreamerProcess(this, modelName);
@@ -90,7 +91,7 @@ namespace cb_downloader_v2
                 // Handling each listener
                 foreach (KeyValuePair<string, LivestreamerProcess> valuePair in _listeners)
                 {
-                    string username = valuePair.Key;
+                    string modelName = valuePair.Key;
                     LivestreamerProcess proc = valuePair.Value;
 
                     // Checking if a (re)start is required
@@ -103,25 +104,14 @@ namespace cb_downloader_v2
                     if (proc.InvalidUrlDetected)
                     {
                         // Telling user URL was invalid
-                        Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + username, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
+                        Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
 
                         // Removing from listeners
                         LivestreamerProcess output;
                         _listeners.TryRemove(valuePair.Key, out output);
 
                         // Removing from UI
-                        modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(username)));
-                    }
-
-                    // Checking if a removal is required
-                    if (!proc.IsRunning && !proc.RestartRequired)
-                    {
-                        // Removing from listeners
-                        LivestreamerProcess output;
-                        _listeners.TryRemove(valuePair.Key, out output);
-
-                        // Removing from UI
-                        modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(username)));
+                        modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
                     }
                 }
             }
@@ -181,7 +171,7 @@ namespace cb_downloader_v2
             foreach (KeyValuePair<string, LivestreamerProcess> valuePair in _listeners)
             {
                 // Fetching listener
-                string username = valuePair.Key;
+                string modelName = valuePair.Key;
                 LivestreamerProcess listener = valuePair.Value;
 
                 // Initiating termination
@@ -189,7 +179,7 @@ namespace cb_downloader_v2
 
                 // Removing listener from list
                 LivestreamerProcess output;
-                _listeners.TryRemove(username, out output);
+                _listeners.TryRemove(modelName, out output);
             }
         }
 
@@ -221,7 +211,7 @@ namespace cb_downloader_v2
                 // Locating item with given name
                 if (!item.Equals(modelName))
                     continue;
-                modelsBox.SetItemCheckState(i, state);
+                modelsBox.Invoke((MethodInvoker)(() => modelsBox.SetItemCheckState(i, state)));
                 return;
             }
         }
