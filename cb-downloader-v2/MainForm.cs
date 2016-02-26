@@ -38,6 +38,7 @@ namespace cb_downloader_v2
             // Reading model file content
             StreamReader r = new StreamReader(ModelsFileName);
             string models = await r.ReadToEndAsync();
+            r.Close();
 
             // Parsing lines, we filter out comments and empty lines
             foreach (string modelName in Regex.Split(models, "\r\n").Where(modelName => modelName.Length != 0 && !modelName.StartsWith("#")))
@@ -260,12 +261,6 @@ namespace cb_downloader_v2
 
                 try
                 {
-                    // Deleting the file if it exists
-                    if (File.Exists(fileName))
-                    {
-                        File.Delete(fileName);
-                    }
-                    
                     // Writing new file
                     File.WriteAllText(fileName, fileContent);
                 }
