@@ -237,5 +237,43 @@ namespace cb_downloader_v2
             LivestreamerProcess output;
             _listeners.TryRemove(modelName, out output);
         }
+
+        private void saveModelsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Prepare dialog
+            SaveFileDialog dialog = new SaveFileDialog
+            {
+                AddExtension = true,
+                DefaultExt = ".txt",
+                Filter = "Text File|*.txt|All Files|*.*",
+                FileName = "models"
+            };
+
+            // Show dialog and save if chosen to
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                // Construct file content
+                string fileContent = modelsBox.Items.Cast<object>().Aggregate("", (current, item) => current + (item + "\r\n"));
+
+                // Attempt to save content
+                string fileName = dialog.FileName;
+
+                try
+                {
+                    // Deleting the file if it exists
+                    if (File.Exists(fileName))
+                    {
+                        File.Delete(fileName);
+                    }
+                    
+                    // Writing new file
+                    File.WriteAllText(fileName, fileContent);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show(this, "Error saving file to: " + fileName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
     }
 }
