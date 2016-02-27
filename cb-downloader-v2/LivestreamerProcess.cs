@@ -8,12 +8,12 @@ namespace cb_downloader_v2
     {
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
         private const string StreamInvalidLinkMessagePart = "(404 Client Error: NOT FOUND)";
+        private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o " + MainForm.OutputFolderName + "/{0}-{2}-{3}.flv";
         private const string Quality = "best";
         private const int RestartDelay = 30 * 1000;
         private readonly MainForm _mf;
         private readonly string _modelName;
-        private int _fileNumber = 1;
         private Process _process;
 
         public bool IsRunning => _process != null && !_process.HasExited;
@@ -33,10 +33,10 @@ namespace cb_downloader_v2
             if (_process != null)
                 return;
 
-            // TODO check if target file name is already taken and increment file number if necessary // could handle it from process text output to restart it.
-            // ...  should also prevent overwrites when doing this.
-
             // Initialising process
+            DateTime timeNow = MainForm.TimeNow;
+            // XXX still need to improve file clash mechanism?
+
             _process = new Process
             {
                 StartInfo =
@@ -45,12 +45,12 @@ namespace cb_downloader_v2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    Arguments = string.Format(CommandArguments, _modelName, Quality, DateTime.Today.ToString("ddMMyy"), _fileNumber)
+                    Arguments = string.Format(CommandArguments, _modelName, Quality, timeNow.ToString("ddMMyy"), timeNow.ToString("hhmmss"))
                 }
             };
 
 #if DEBUG
-            Debug.WriteLine(_fileNumber == 1 ? "[{0}] Started #{1}" : "[{0}] Restarted #{1}", _modelName, _fileNumber);
+            Debug.WriteLine("Started #{0}" , _modelName);
 #endif
 
             // Updating flags and starting process
@@ -60,7 +60,6 @@ namespace cb_downloader_v2
             _process.Start();
             _process.BeginOutputReadLine();
             _mf.SetCheckState(_modelName, CheckState.Checked);
-            _fileNumber++;
         }
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -99,7 +98,7 @@ namespace cb_downloader_v2
             }
 
             // Checking if stream is offline
-            if (line.StartsWith("error: No streams found on this URL: "))
+            if (line.StartsWith(StreamOfflineMessagePart))
             {
 #if DEBUG
                 Debug.WriteLine("[" + _modelName + "] is Offline");

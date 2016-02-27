@@ -14,7 +14,9 @@ namespace cb_downloader_v2
     {
         // TODO play with checkbox stuff until it makes sense - right now its always checked due to how it flows, after initial start of process
         // TODO dont let user check/uncheck the checkboxes
-        private const int ListenerSleepDelay = 5 * 1000;
+        // TODO find a way to check if models are online or not - to reduce cpu usage spike
+        public static DateTime TimeNow;
+        private const int ListenerSleepDelay = 30 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
         private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();
@@ -88,6 +90,9 @@ namespace cb_downloader_v2
                 // Skip iteration if no listeners are attached
                 if (_listeners.Count == 0)
                     continue;
+
+                // Update cached time
+                TimeNow = DateTime.Now;
 
                 // Handling each listener
                 foreach (KeyValuePair<string, LivestreamerProcess> valuePair in _listeners)
@@ -205,6 +210,7 @@ namespace cb_downloader_v2
 
         public void SetCheckState(string modelName, CheckState state)
         {
+            // XXX could use binary search to speed up - since models list is sorted alphabetically
             for (int i = 0; i < modelsBox.Items.Count; i++)
             {
                 var item = modelsBox.Items[i];
