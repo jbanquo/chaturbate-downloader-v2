@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,9 +17,11 @@ namespace cb_downloader_v2
         private const int RestartDelay = 30 * 1000;
         private readonly MainForm _mf;
         private readonly string _modelName;
+        private readonly CancellationTokenSource _cancelToken = new CancellationTokenSource();
         private Process _process;
 
-        public bool IsRunning => _process != null && !_process.HasExited;
+        public bool IsRunning => _process != null && Started && !_process.HasExited;
+        private bool Started { get; set; }
         public bool RestartRequired { get; private set; } = true;
         public bool InvalidUrlDetected { get; private set; }
         public int RestartTime { get; private set; }
@@ -50,12 +53,12 @@ namespace cb_downloader_v2
                     Arguments = string.Format(CommandArguments, _modelName, Quality, timeNow.ToString("ddMMyy"), timeNow.ToString("hhmmss"))
                 }
             };
-
+            
             // Delayed start, to prevent massive cpu spikes
-            Task.Delay(Random.Next(500, 30000)).ContinueWith((task =>
+            Task.Delay(Random.Next(500, 30000), _cancelToken.Token).ContinueWith((task =>
             {
 #if DEBUG
-                Debug.WriteLine("Started #{0}", _modelName);
+                Debug.WriteLine("Started #" + _modelName);
 #endif
 
                 // Updating flags and starting process
@@ -64,8 +67,9 @@ namespace cb_downloader_v2
                 _process.OutputDataReceived += _process_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
+                Started = true;
                 _mf.SetCheckState(_modelName, CheckState.Checked);
-            }));
+            }), _cancelToken.Token);
         }
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -123,6 +127,9 @@ namespace cb_downloader_v2
             // Checking if process is existent
             if (_process == null)
                 return;
+
+            // Set the cancellation token
+            _cancelToken.Cancel();
 
             // Attempting to close process
             if (IsRunning)
