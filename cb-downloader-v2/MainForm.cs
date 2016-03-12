@@ -14,9 +14,8 @@ namespace cb_downloader_v2
     {
         // TODO play with checkbox stuff until it makes sense - right now its always checked due to how it flows, after initial start of process
         // TODO dont let user check/uncheck the checkboxes
-        // TODO find a way to check if models are online or not - to reduce cpu usage spike
         public static DateTime TimeNow;
-        private const int ListenerSleepDelay = 30 * 1000;
+        private const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
         private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();

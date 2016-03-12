@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace cb_downloader_v2
 {
     internal class LivestreamerProcess
     {
+        private static readonly Random Random = new Random();
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
         private const string StreamInvalidLinkMessagePart = "(404 Client Error: NOT FOUND)";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
@@ -49,17 +51,21 @@ namespace cb_downloader_v2
                 }
             };
 
+            // Delayed start, to prevent massive cpu spikes
+            Task.Delay(Random.Next(500, 30000)).ContinueWith((task =>
+            {
 #if DEBUG
-            Debug.WriteLine("Started #{0}" , _modelName);
+                Debug.WriteLine("Started #{0}", _modelName);
 #endif
 
-            // Updating flags and starting process
-            RestartRequired = false;
-            InvalidUrlDetected = false;
-            _process.OutputDataReceived += _process_OutputDataReceived;
-            _process.Start();
-            _process.BeginOutputReadLine();
-            _mf.SetCheckState(_modelName, CheckState.Checked);
+                // Updating flags and starting process
+                RestartRequired = false;
+                InvalidUrlDetected = false;
+                _process.OutputDataReceived += _process_OutputDataReceived;
+                _process.Start();
+                _process.BeginOutputReadLine();
+                _mf.SetCheckState(_modelName, CheckState.Checked);
+            }));
         }
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
