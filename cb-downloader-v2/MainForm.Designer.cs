@@ -52,6 +52,7 @@
             this.modelsBox.Size = new System.Drawing.Size(387, 259);
             this.modelsBox.Sorted = true;
             this.modelsBox.TabIndex = 0;
+            this.modelsBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.modelsBox_ItemCheck);
             // 
             // modelsBoxCtxMenu
             // 

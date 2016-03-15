@@ -14,13 +14,26 @@ namespace cb_downloader_v2
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o " + MainForm.OutputFolderName + "/{0}-{2}-{3}.flv";
         private const string Quality = "best";
-        private const int RestartDelay = 30 * 1000;
+        private const int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
         private readonly MainForm _mf;
         private readonly string _modelName;
-        private readonly CancellationTokenSource _cancelToken = new CancellationTokenSource();
+        private CancellationTokenSource _cancelToken;
         private Process _process;
 
-        public bool IsRunning => _process != null && Started && !_process.HasExited;
+        public bool IsRunning
+        {
+            get
+            {
+                // TODO clean up
+                try
+                {
+                    return _process != null && Started && !_process.HasExited;
+                } catch (Exception) {
+                    return false;
+                }
+            }
+        }
+
         private bool Started { get; set; }
         public bool RestartRequired { get; private set; } = true;
         public bool InvalidUrlDetected { get; private set; }
@@ -40,6 +53,7 @@ namespace cb_downloader_v2
 
             // Initialising process
             DateTime timeNow = MainForm.TimeNow;
+            _cancelToken = new CancellationTokenSource();
             // XXX still need to improve file clash mechanism?
 
             _process = new Process
@@ -54,9 +68,13 @@ namespace cb_downloader_v2
                 }
             };
             
-            // Delayed start, to prevent massive cpu spikes
-            Task.Delay(Random.Next(500, 30000), _cancelToken.Token).ContinueWith((task =>
+            // Delayed start, a tad bit randomised, to prevent massive cpu spikes
+            Task.Delay(Random.Next(100, MainForm.ListenerSleepDelay / 2), _cancelToken.Token).ContinueWith(task =>
             {
+                // Cancel if process is null
+                if (_process == null)
+                    return;
+
 #if DEBUG
                 Debug.WriteLine("Started #" + _modelName);
 #endif
@@ -69,7 +87,7 @@ namespace cb_downloader_v2
                 _process.BeginOutputReadLine();
                 Started = true;
                 _mf.SetCheckState(_modelName, CheckState.Checked);
-            }), _cancelToken.Token);
+            }, _cancelToken.Token);
         }
 
         private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -91,7 +109,6 @@ namespace cb_downloader_v2
                 RestartRequired = true;
                 RestartTime = 0;
                 Terminate();
-                _mf.SetCheckState(_modelName, CheckState.Unchecked);
             }
 
             // Checking if the username is invalid
@@ -103,7 +120,8 @@ namespace cb_downloader_v2
 
                 // Terminating the thread and marking as invalid url
                 InvalidUrlDetected = true;
-                _mf.SetCheckState(_modelName, CheckState.Unchecked);
+                RestartRequired = false;
+                RestartTime = 0;
                 Terminate();
             }
 
@@ -117,19 +135,21 @@ namespace cb_downloader_v2
                 // Terminating the thread and marking for a delayed restart
                 RestartRequired = true;
                 RestartTime = Environment.TickCount + RestartDelay;
-                _mf.SetCheckState(_modelName, CheckState.Unchecked);
                 Terminate();
             }
         }
 
         public void Terminate()
         {
+            // Activate cancellation token
+            if (_cancelToken != null && !_cancelToken.IsCancellationRequested)
+            {
+                _cancelToken.Cancel();
+            }
+
             // Checking if process is existent
             if (_process == null)
                 return;
-
-            // Set the cancellation token
-            _cancelToken.Cancel();
 
             // Attempting to close process
             if (IsRunning)
@@ -138,6 +158,7 @@ namespace cb_downloader_v2
                 _process.Close();
             }
             _process = null;
+            _mf.SetCheckState(_modelName, CheckState.Unchecked);
         }
     }
 }

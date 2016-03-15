@@ -12,14 +12,16 @@ namespace cb_downloader_v2
 {
     public partial class MainForm : Form
     {
-        // TODO play with checkbox stuff until it makes sense - right now its always checked due to how it flows, after initial start of process
-        // TODO dont let user check/uncheck the checkboxes
         public static DateTime TimeNow;
-        private const int ListenerSleepDelay = 60 * 1000;
+        public const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
         private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();
         private Thread _listenerThread;
+        /// <summary>
+        ///     Whether or not the modelsBox allows checking of items.
+        /// </summary>
+        private bool _checkingLocked = true;
 
         public MainForm()
         {
@@ -100,7 +102,7 @@ namespace cb_downloader_v2
                     LivestreamerProcess proc = valuePair.Value;
 
                     // Checking if a (re)start is required
-                    if (Environment.TickCount > proc.RestartTime && !proc.IsRunning && proc.RestartRequired)
+                    if (proc.RestartRequired && !proc.IsRunning && Environment.TickCount > proc.RestartTime)
                     {
                         proc.Start();
                     }
@@ -207,8 +209,16 @@ namespace cb_downloader_v2
             }
         }
 
+
+        /// <summary>
+        ///     This uses the _checkingLocked variable to not allow the property to affect it.
+        /// </summary>
+        /// <param name="modelName"></param>
+        /// <param name="state"></param>
         public void SetCheckState(string modelName, CheckState state)
         {
+            _checkingLocked = false;
+
             // XXX could use binary search to speed up - since models list is sorted alphabetically
             for (int i = 0; i < modelsBox.Items.Count; i++)
             {
@@ -218,6 +228,7 @@ namespace cb_downloader_v2
                 if (!item.Equals(modelName))
                     continue;
                 modelsBox.Invoke((MethodInvoker)(() => modelsBox.SetItemCheckState(i, state)));
+                _checkingLocked = true;
                 return;
             }
         }
@@ -273,6 +284,15 @@ namespace cb_downloader_v2
                 {
                     MessageBox.Show(this, "Error saving file to: " + fileName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private void modelsBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            // Disabling user checking
+            if (_checkingLocked)
+            {
+                e.NewValue = e.CurrentValue;
             }
         }
     }
