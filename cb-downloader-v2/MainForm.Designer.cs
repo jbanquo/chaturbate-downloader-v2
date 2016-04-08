@@ -38,6 +38,7 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quickAddModelButton = new System.Windows.Forms.Button();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -81,16 +82,16 @@
             // 
             // modelNameTextBox
             // 
-            this.modelNameTextBox.Location = new System.Drawing.Point(12, 325);
+            this.modelNameTextBox.Location = new System.Drawing.Point(12, 327);
             this.modelNameTextBox.Name = "modelNameTextBox";
-            this.modelNameTextBox.Size = new System.Drawing.Size(318, 20);
+            this.modelNameTextBox.Size = new System.Drawing.Size(231, 20);
             this.modelNameTextBox.TabIndex = 2;
             this.modelNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyDown);
             this.modelNameTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyUp);
             // 
             // addModelButton
             // 
-            this.addModelButton.Location = new System.Drawing.Point(336, 325);
+            this.addModelButton.Location = new System.Drawing.Point(249, 325);
             this.addModelButton.Name = "addModelButton";
             this.addModelButton.Size = new System.Drawing.Size(75, 23);
             this.addModelButton.TabIndex = 2;
@@ -124,11 +125,22 @@
             this.saveModelsToolStripMenuItem.Text = "Save Models...";
             this.saveModelsToolStripMenuItem.Click += new System.EventHandler(this.saveModelsToolStripMenuItem_Click);
             // 
+            // quickAddModelButton
+            // 
+            this.quickAddModelButton.Location = new System.Drawing.Point(330, 325);
+            this.quickAddModelButton.Name = "quickAddModelButton";
+            this.quickAddModelButton.Size = new System.Drawing.Size(75, 23);
+            this.quickAddModelButton.TabIndex = 4;
+            this.quickAddModelButton.Text = "Quick Add";
+            this.quickAddModelButton.UseVisualStyleBackColor = true;
+            this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 356);
+            this.Controls.Add(this.quickAddModelButton);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.modelNameTextBox);
             this.Controls.Add(this.addModelButton);
@@ -158,6 +170,7 @@
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveModelsToolStripMenuItem;
+        private System.Windows.Forms.Button quickAddModelButton;
     }
 }
 

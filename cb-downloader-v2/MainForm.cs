@@ -50,7 +50,7 @@ namespace cb_downloader_v2
             }
         }
 
-        private void AddUser(string modelName)
+        private void AddUser(string modelName, bool quickStart = false)
         {
             // Normalising name
             modelName = modelName.ToLower();
@@ -74,6 +74,11 @@ namespace cb_downloader_v2
             LivestreamerProcess proc = new LivestreamerProcess(this, modelName);
             modelsBox.Items.Add(modelName);
             _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
+
+            // Quick start functionality (i.e. start listener immediately)
+            // XXX this may cause issues
+            if (quickStart)
+                proc.Start();
         }
 
         private void InitializeListener()
@@ -149,6 +154,13 @@ namespace cb_downloader_v2
         {
             // Adding user to listener
             AddUser(modelNameTextBox.Text);
+            modelNameTextBox.Text = "";
+        }
+
+        private void quickAddModelButton_Click(object sender, EventArgs e)
+        {
+            // Adding user to listener and start immediately
+            AddUser(modelNameTextBox.Text, true);
             modelNameTextBox.Text = "";
         }
 
