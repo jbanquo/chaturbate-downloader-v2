@@ -12,7 +12,7 @@ namespace cb_downloader_v2
 {
     public partial class MainForm : Form
     {
-        public static DateTime TimeNow;
+        public static DateTime TimeNow = DateTime.Now;
         public const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
