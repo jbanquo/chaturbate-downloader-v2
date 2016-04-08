@@ -58,7 +58,7 @@ namespace cb_downloader_v2
             // Checking input validity
             if (string.IsNullOrWhiteSpace(modelName))
             {
-                MessageBox.Show(this, "Invalid model name, cannot be empty or whitespace.", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Information);
+//                MessageBox.Show(this, "Invalid model name, cannot be empty or whitespace.", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
