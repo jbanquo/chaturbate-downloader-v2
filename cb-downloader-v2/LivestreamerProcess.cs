@@ -45,7 +45,7 @@ namespace cb_downloader_v2
             _modelName = modelName;
         }
 
-        public void Start()
+        public void Start(bool quickStart = false)
         {
             // Checking if a process is not already running
             if (_process != null)
@@ -69,14 +69,15 @@ namespace cb_downloader_v2
             };
             
             // Delayed start, a tad bit randomised, to prevent massive cpu spikes
-            Task.Delay(Random.Next(100, MainForm.ListenerSleepDelay / 2), _cancelToken.Token).ContinueWith(task =>
+            int delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
+            Task.Delay(quickStart ? 100 : delay, _cancelToken.Token).ContinueWith(task =>
             {
                 // Cancel if process is null
                 if (_process == null)
                     return;
 
 #if DEBUG
-                Debug.WriteLine("Started #" + _modelName);
+                Debug.WriteLine("Started " + _modelName);
 #endif
 
                 // Updating flags and starting process

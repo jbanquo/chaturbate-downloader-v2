@@ -77,8 +77,7 @@ namespace cb_downloader_v2
 
             // Quick start functionality (i.e. start listener immediately)
             // XXX this may cause issues
-            if (quickStart)
-                proc.Start();
+            proc.Start(quickStart);
         }
 
         private void InitializeListener()
