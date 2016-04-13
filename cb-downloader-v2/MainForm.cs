@@ -44,7 +44,8 @@ namespace cb_downloader_v2
             r.Close();
 
             // Parsing lines, we filter out comments and empty lines
-            foreach (string modelName in Regex.Split(models, "\r\n").Where(modelName => modelName.Length != 0 && !modelName.StartsWith("#")))
+            foreach (string modelName in Regex.Split(models, "\r\n")
+                .Where(modelName => modelName.Length != 0 && !modelName.StartsWith("#")))
             {
                 AddUser(modelName);
             }

@@ -55,6 +55,8 @@ namespace cb_downloader_v2
             DateTime timeNow = MainForm.TimeNow;
             _cancelToken = new CancellationTokenSource();
             // XXX still need to improve file clash mechanism?
+            string date = timeNow.ToString("ddMMyy");
+            string time = timeNow.ToString("hhmmss");
 
             _process = new Process
             {
@@ -64,7 +66,7 @@ namespace cb_downloader_v2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    Arguments = string.Format(CommandArguments, _modelName, Quality, timeNow.ToString("ddMMyy"), timeNow.ToString("hhmmss"))
+                    Arguments = string.Format(CommandArguments, _modelName, Quality, date, time)
                 }
             };
             
@@ -98,6 +100,10 @@ namespace cb_downloader_v2
             // Checking line validity
             if (string.IsNullOrEmpty(line))
                 return;
+
+#if DEBUG
+            Debug.WriteLine("[" + _modelName + "#RAW] " + line);
+#endif
 
             // Checking if the stream was terminated
             if (line.Equals(StreamTerminatedMessage))
@@ -159,6 +165,8 @@ namespace cb_downloader_v2
                 _process.Close();
             }
             _process = null;
+
+            // Uncheck on models list in form
             _mf.SetCheckState(_modelName, CheckState.Unchecked);
         }
     }
