@@ -64,7 +64,7 @@ namespace cb_downloader_v2
             }
 
 #if DEBUG
-            Debug.WriteLine("AddUser: " + modelName);
+            Debug.WriteLine("AddUser " + modelName);
 #endif
 
             // Checking if the model is already being listened to

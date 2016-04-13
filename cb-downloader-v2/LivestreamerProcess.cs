@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,7 +13,8 @@ namespace cb_downloader_v2
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
         private const string StreamInvalidLinkMessagePart = "(404 Client Error: NOT FOUND)";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
-        private const string CommandArguments = "chaturbate.com/{0} {1} -o " + MainForm.OutputFolderName + "/{0}-{2}-{3}.flv";
+        private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
+        private const string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
         private const string Quality = "best";
         private const int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
         private readonly MainForm _mf;
@@ -51,13 +53,11 @@ namespace cb_downloader_v2
             if (_process != null)
                 return;
 
-            // Initialising process
-            DateTime timeNow = MainForm.TimeNow;
+            // Fetching file name
             _cancelToken = new CancellationTokenSource();
-            // XXX still need to improve file clash mechanism?
-            string date = timeNow.ToString("ddMMyy");
-            string time = timeNow.ToString("hhmmss");
+            string fileName = SeedFileName();
 
+            // Create process
             _process = new Process
             {
                 StartInfo =
@@ -66,7 +66,7 @@ namespace cb_downloader_v2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    Arguments = string.Format(CommandArguments, _modelName, Quality, date, time)
+                    Arguments = string.Format(CommandArguments, _modelName, Quality, fileName)
                 }
             };
             
@@ -85,7 +85,7 @@ namespace cb_downloader_v2
                 // Updating flags and starting process
                 RestartRequired = false;
                 InvalidUrlDetected = false;
-                _process.OutputDataReceived += _process_OutputDataReceived;
+                _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
                 Started = true;
@@ -93,7 +93,24 @@ namespace cb_downloader_v2
             }, _cancelToken.Token);
         }
 
-        private void _process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private string SeedFileName()
+        {
+            DateTime timeNow = MainForm.TimeNow;
+            string date = timeNow.ToString("ddMMyy");
+            string time = timeNow.ToString("hhmmss");
+            string fileName = string.Format(FileNameTemplate, _modelName, date, time, "");
+
+            // Get a file name which is not in use
+            int no = 0;
+
+            while (File.Exists(fileName))
+            {
+                fileName = string.Format(FileNameTemplate, _modelName, date, time, "-" + no++);
+            }
+            return fileName;
+        }
+
+        private void LivestreamerProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             string line = e.Data;
 
