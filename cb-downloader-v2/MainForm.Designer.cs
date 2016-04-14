@@ -38,8 +38,8 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.quickAddModelButton = new System.Windows.Forms.Button();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quickAddModelButton = new System.Windows.Forms.Button();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -127,6 +127,13 @@
             this.saveModelsToolStripMenuItem.Text = "Save Models...";
             this.saveModelsToolStripMenuItem.Click += new System.EventHandler(this.saveModelsToolStripMenuItem_Click);
             // 
+            // logToolStripMenuItem
+            // 
+            this.logToolStripMenuItem.Name = "logToolStripMenuItem";
+            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.logToolStripMenuItem.Text = "Log Debug Output";
+            this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
+            // 
             // quickAddModelButton
             // 
             this.quickAddModelButton.Location = new System.Drawing.Point(330, 325);
@@ -136,13 +143,6 @@
             this.quickAddModelButton.Text = "Quick Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
-            // 
-            // logToolStripMenuItem
-            // 
-            this.logToolStripMenuItem.Name = "logToolStripMenuItem";
-            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.logToolStripMenuItem.Text = "Log";
-            this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
             // 
             // MainForm
             // 

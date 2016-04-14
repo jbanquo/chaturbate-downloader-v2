@@ -112,9 +112,17 @@ namespace cb_downloader_v2
             string line = e.Data;
 
             // Checking line validity
-            if (string.IsNullOrEmpty(line))
+
+            if (line == null)
+            {
+                Logger.Log(_modelName, "Null line");
+                return;
+            }
+
+            if (line.Length == 0)
                 return;
             
+            // Parsing line
             Logger.Log(_modelName + "#RAW", line);
 
             // Checking if the stream was terminated
