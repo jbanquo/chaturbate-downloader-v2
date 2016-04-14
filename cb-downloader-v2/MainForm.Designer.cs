@@ -39,6 +39,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quickAddModelButton = new System.Windows.Forms.Button();
+            this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -112,7 +113,8 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.saveModelsToolStripMenuItem});
+            this.saveModelsToolStripMenuItem,
+            this.logToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -134,6 +136,13 @@
             this.quickAddModelButton.Text = "Quick Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
+            // 
+            // logToolStripMenuItem
+            // 
+            this.logToolStripMenuItem.Name = "logToolStripMenuItem";
+            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.logToolStripMenuItem.Text = "Log";
+            this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -172,6 +181,7 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveModelsToolStripMenuItem;
         private System.Windows.Forms.Button quickAddModelButton;
+        private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
     }
 }
 

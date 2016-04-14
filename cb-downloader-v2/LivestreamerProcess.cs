@@ -78,10 +78,6 @@ namespace cb_downloader_v2
                 if (_process == null)
                     return;
 
-#if DEBUG
-                Debug.WriteLine("Started " + _modelName);
-#endif
-
                 // Updating flags and starting process
                 RestartRequired = false;
                 InvalidUrlDetected = false;
@@ -90,6 +86,7 @@ namespace cb_downloader_v2
                 _process.BeginOutputReadLine();
                 Started = true;
                 _mf.SetCheckState(_modelName, CheckState.Checked);
+                Logger.Log(_modelName, "Started");
             }, _cancelToken.Token);
         }
 
@@ -117,17 +114,13 @@ namespace cb_downloader_v2
             // Checking line validity
             if (string.IsNullOrEmpty(line))
                 return;
-
-#if DEBUG
-            Debug.WriteLine("[" + _modelName + "#RAW] " + line);
-#endif
+            
+            Logger.Log(_modelName + "#RAW", line);
 
             // Checking if the stream was terminated
             if (line.Equals(StreamTerminatedMessage))
             {
-#if DEBUG
-                Debug.WriteLine("[" + _modelName + "] Terminated");
-#endif
+                Logger.Log(_modelName, "Terminated");
 
                 // Terminating the thread and marking for a restart
                 RestartRequired = true;
@@ -138,9 +131,7 @@ namespace cb_downloader_v2
             // Checking if the username is invalid
             if (line.Contains(StreamInvalidLinkMessagePart))
             {
-#if DEBUG
-                Debug.WriteLine("[" + _modelName + "] Not Found (404)");
-#endif
+                Logger.Log(_modelName, "Not Found (404)");
 
                 // Terminating the thread and marking as invalid url
                 InvalidUrlDetected = true;
@@ -152,9 +143,7 @@ namespace cb_downloader_v2
             // Checking if stream is offline
             if (line.StartsWith(StreamOfflineMessagePart))
             {
-#if DEBUG
-                Debug.WriteLine("[" + _modelName + "] is Offline");
-#endif
+                Logger.Log(_modelName, "Offline");
 
                 // Terminating the thread and marking for a delayed restart
                 RestartRequired = true;

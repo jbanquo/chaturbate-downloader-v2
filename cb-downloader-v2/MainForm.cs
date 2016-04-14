@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -63,9 +62,7 @@ namespace cb_downloader_v2
                 return;
             }
 
-#if DEBUG
-            Debug.WriteLine("AddUser " + modelName);
-#endif
+            Logger.Log(modelName, "Added");
 
             // Checking if the model is already being listened to
             if (modelsBox.Items.Cast<object>().Contains(modelName))
@@ -265,6 +262,7 @@ namespace cb_downloader_v2
             modelsBox.Items.RemoveAt(idx);
             LivestreamerProcess output;
             _listeners.TryRemove(modelName, out output);
+            Logger.Log(modelName, "Remove");
         }
 
         private void saveModelsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -306,6 +304,13 @@ namespace cb_downloader_v2
             {
                 e.NewValue = e.CurrentValue;
             }
+        }
+
+        private void logToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Toggle log to file
+            logToolStripMenuItem.Checked = !logToolStripMenuItem.Checked;
+            Logger.LogToFile = logToolStripMenuItem.Checked;
         }
     }
 }
