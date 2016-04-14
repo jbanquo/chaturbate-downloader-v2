@@ -11,7 +11,9 @@ namespace cb_downloader_v2
     {
         private static readonly Random Random = new Random();
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
-        private const string StreamInvalidLinkMessagePart = "(404 Client Error: NOT FOUND)";
+        private const string StreamUnableToOpen = "Unable to open URL";
+        private const string StreamFailedToOpenSegment = "Failed to open segment";
+        private const string StreamInvalidLinkMessagePart = "(404 Client Error: Not Found)";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private const string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
@@ -137,9 +139,10 @@ namespace cb_downloader_v2
             }
 
             // Checking if the username is invalid
-            if (line.Contains(StreamInvalidLinkMessagePart))
+            if (line.Contains(StreamUnableToOpen) && line.EndsWith(StreamInvalidLinkMessagePart)
+                && !line.Contains(StreamFailedToOpenSegment))
             {
-                Logger.Log(_modelName, "Not Found (404)");
+                Logger.Log(_modelName, "Invalid username (404/unable to open)");
 
                 // Terminating the thread and marking as invalid url
                 InvalidUrlDetected = true;
