@@ -13,7 +13,9 @@ namespace cb_downloader_v2
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
         private const string StreamUnableToOpen = "Unable to open URL";
         private const string StreamFailedToOpenSegment = "Failed to open segment";
+        private const string StreamUnableToReloadPlaylist = "Failed to reload playlist";
         private const string StreamInvalidLinkMessagePart = "(404 Client Error: Not Found)";
+        private const string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private const string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
@@ -138,9 +140,20 @@ namespace cb_downloader_v2
                 Terminate();
             }
 
+            // Checking if service is offline (i.e. being ddosed)
+            if (line.Contains(StreamServiceUnavailablePart))
+            {
+                Logger.Log(_modelName, "Service Unavailable");
+
+                // Terminating the thread and marking for a delayed restart
+                RestartRequired = true;
+                RestartTime = Environment.TickCount + RestartDelay;
+                Terminate();
+            }
+
             // Checking if the username is invalid
             if (line.Contains(StreamUnableToOpen) && line.EndsWith(StreamInvalidLinkMessagePart)
-                && !line.Contains(StreamFailedToOpenSegment))
+                && !line.Contains(StreamFailedToOpenSegment) && !line.Contains(StreamUnableToReloadPlaylist))
             {
                 Logger.Log(_modelName, "Invalid username (404/unable to open)");
 
