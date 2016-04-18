@@ -22,7 +22,14 @@ namespace cb_downloader_v2
             // Write to log file if required
             if (LogToFile)
             {
-                File.AppendAllText(LogFileName, log + Environment.NewLine);
+                try
+                {
+                    File.AppendAllText(LogFileName, log + Environment.NewLine);
+                }
+                catch
+                {
+                    // ignored
+                }
             }
         }
     }
