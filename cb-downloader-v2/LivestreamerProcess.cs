@@ -15,6 +15,7 @@ namespace cb_downloader_v2
         private const string StreamFailedToOpenSegment = "Failed to open segment";
         private const string StreamUnableToReloadPlaylist = "Failed to reload playlist";
         private const string StreamInvalidLinkMessagePart = "(404 Client Error: Not Found)";
+        private const string StreamCutoffPart = "live-origin";
         private const string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
@@ -153,7 +154,8 @@ namespace cb_downloader_v2
 
             // Checking if the username is invalid
             if (line.Contains(StreamUnableToOpen) && line.EndsWith(StreamInvalidLinkMessagePart)
-                && !line.Contains(StreamFailedToOpenSegment) && !line.Contains(StreamUnableToReloadPlaylist))
+                && !line.Contains(StreamFailedToOpenSegment) && !line.Contains(StreamUnableToReloadPlaylist)
+                && !line.Contains(StreamCutoffPart))
             {
                 Logger.Log(_modelName, "Invalid username (404/unable to open)");
 
