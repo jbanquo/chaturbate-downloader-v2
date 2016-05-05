@@ -108,22 +108,22 @@ namespace cb_downloader_v2
                     {
                         proc.Start();
                     }
-
-                    // Checking if URL was invalid
-                    if (proc.InvalidUrlDetected)
-                    {
-                        // Telling user URL was invalid
-                        Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
-
-                        // Removing from listeners
-                        LivestreamerProcess output;
-                        _listeners.TryRemove(valuePair.Key, out output);
-
-                        // Removing from UI
-                        modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
-                    }
                 }
             }
+        }
+
+        public void RemoveInvalidUrlModel(string modelName, LivestreamerProcess proc)
+        {
+
+            // Telling user URL was invalid
+            Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
+
+            // Removing from listeners
+            LivestreamerProcess output;
+            _listeners.TryRemove(modelName, out output);
+
+            // Removing from UI
+            modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
         }
 
         private void PrepareOutputFolder()

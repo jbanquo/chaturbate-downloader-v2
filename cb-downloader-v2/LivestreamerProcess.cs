@@ -7,15 +7,10 @@ using System.Windows.Forms;
 
 namespace cb_downloader_v2
 {
-    internal class LivestreamerProcess
+    public class LivestreamerProcess
     {
         private static readonly Random Random = new Random();
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
-        private const string StreamUnableToOpen = "Unable to open URL";
-        private const string StreamFailedToOpenSegment = "Failed to open segment";
-        private const string StreamUnableToReloadPlaylist = "Failed to reload playlist";
-        private const string StreamInvalidLinkMessagePart = "(404 Client Error: Not Found)";
-        private const string StreamCutoffPart = "live-origin";
         private const string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
         private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
@@ -43,13 +38,15 @@ namespace cb_downloader_v2
 
         private bool Started { get; set; }
         public bool RestartRequired { get; private set; } = true;
-        public bool InvalidUrlDetected { get; private set; }
         public int RestartTime { get; private set; }
+        private readonly string _streamInvalidUsernameMessage;
 
         public LivestreamerProcess(MainForm parent, string modelName)
         {
             _mf = parent;
             _modelName = modelName;
+            _streamInvalidUsernameMessage =
+                "error: Unable to open URL: http://chaturbate.com/" + _modelName + " (404 Client Error: Not Found)";
         }
 
         public void Start(bool quickStart = false)
@@ -85,7 +82,6 @@ namespace cb_downloader_v2
 
                 // Updating flags and starting process
                 RestartRequired = false;
-                InvalidUrlDetected = false;
                 _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
@@ -127,7 +123,7 @@ namespace cb_downloader_v2
                 return;
             
             // Parsing line
-            Logger.Log(_modelName + "#RAW", line);
+            Logger.Log(_modelName, "[raw]" + line);
 
             // Checking if the stream was terminated
             if (line.Equals(StreamTerminatedMessage))
@@ -152,17 +148,16 @@ namespace cb_downloader_v2
             }
 
             // Checking if the username is invalid
-            if (line.Contains(StreamUnableToOpen) && line.EndsWith(StreamInvalidLinkMessagePart)
-                && !line.Contains(StreamFailedToOpenSegment) && !line.Contains(StreamUnableToReloadPlaylist)
-                && !line.Contains(StreamCutoffPart))
+            if (line.Contains(_streamInvalidUsernameMessage))
             {
-                Logger.Log(_modelName, "Invalid username (404/unable to open)");
+                Logger.Log(_modelName, "Invalid username (404)");
 
                 // Terminating the thread and marking as invalid url
-                InvalidUrlDetected = true;
                 RestartRequired = false;
-                RestartTime = 0;
                 Terminate();
+
+                // Removing process from GUI
+                _mf.RemoveInvalidUrlModel(_modelName, this);
             }
 
             // Checking if stream is offline

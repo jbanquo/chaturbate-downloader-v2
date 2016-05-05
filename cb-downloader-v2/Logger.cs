@@ -10,9 +10,9 @@ namespace cb_downloader_v2
         public static string LogFileName { get; set; } = "logs.txt";
         public static bool LogToFile { get; set; } = false;
 
-        public static void Log(string evt, string line)
+        public static void Log(string modelName, string line)
         {
-            string log = DateTime.Now.ToString("s") + " " + evt + " " + line;
+            string log = DateTime.Now.ToString("s") + " " + modelName + " " + line;
             
             // Print line if in debug mode
 #if DEBUG
