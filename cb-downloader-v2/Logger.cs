@@ -12,7 +12,7 @@ namespace cb_downloader_v2
 
         public static void Log(string evt, string line)
         {
-            string log = DateTime.Now.ToString("s") + " [" + evt + "] " + line;
+            string log = DateTime.Now.ToString("s") + " " + evt + " " + line;
             
             // Print line if in debug mode
 #if DEBUG

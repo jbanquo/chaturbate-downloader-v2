@@ -116,11 +116,10 @@ namespace cb_downloader_v2
         {
             string line = e.Data;
 
-            // Checking line validity
-
+            // Checking if end of stream
             if (line == null)
             {
-                Logger.Log(_modelName, "Null line");
+                Logger.Log(_modelName, "End of stream");
                 return;
             }
 
