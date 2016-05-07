@@ -53,7 +53,7 @@ namespace cb_downloader_v2
         private void AddUser(string modelName, bool quickStart = false)
         {
             // Normalising name
-            modelName = modelName.ToLower();
+            modelName = NormaliseModelName(modelName);
 
             // Checking input validity
             if (string.IsNullOrWhiteSpace(modelName))
@@ -76,6 +76,13 @@ namespace cb_downloader_v2
             // Quick start functionality (i.e. start listener immediately)
             // XXX this may cause issues
             proc.Start(quickStart);
+        }
+
+        private string NormaliseModelName(string modelName)
+        {
+            // XXX check if cb link: try using regex: ^(https?:\/\/)?chaturbate\.com\/[\d|a-zA-Z|_]+\/?$
+            // and add more domains to it
+            return modelName.Trim(' ', '\t', '/', '\\');
         }
 
         private void InitializeListener()
