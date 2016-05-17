@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,6 +18,7 @@ namespace cb_downloader_v2
         public const string OutputFolderName = "Recordings";
         private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();
         private Thread _listenerThread;
+        private readonly Regex _chaturbateLinkRegex = new Regex(@"^(https?:\/\/)?chaturbate\.com\/[\da-zA-Z_]+\/?$"); // XXX add more domains (i.e. de)
         /// <summary>
         ///     Whether or not the modelsBox allows checking of items.
         /// </summary>
@@ -80,9 +82,39 @@ namespace cb_downloader_v2
 
         private string NormaliseModelName(string modelName)
         {
-            // XXX check if cb link: try using regex: ^(https?:\/\/)?chaturbate\.com\/[\d|a-zA-Z|_]+\/?$
-            // and add more domains to it
-            return modelName.Trim(' ', '\t', '/', '\\');
+            // Check if cb link or not
+            Match m = _chaturbateLinkRegex.Match(modelName);
+
+            if (m.Success) // if cb link
+            {
+                // parse out model name
+                if (modelName.EndsWith("/"))
+                {
+                    modelName = modelName.Substring(0, modelName.Length);
+                }
+
+                // find last slash
+                int lastSlshIdx = modelName.LastIndexOf('/');
+
+                if (lastSlshIdx == -1)
+                {
+                    // this should NEVER occur
+                    return "";
+                }
+                else
+                {
+                    modelName = modelName.Substring(lastSlshIdx + 1);
+
+#if DEBUG
+                    Debug.WriteLine("Converted Chaturbate link into model name: " + modelName);
+#endif
+                    return modelName;
+                }
+            }
+            else // if not
+            {
+                return modelName.Trim(' ', '\t', '/', '\\');
+            }
         }
 
         private void InitializeListener()
