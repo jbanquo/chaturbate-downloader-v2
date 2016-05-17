@@ -40,6 +40,7 @@ namespace cb_downloader_v2
         public bool RestartRequired { get; private set; } = true;
         public int RestartTime { get; private set; }
         private readonly string _streamInvalidUsernameMessage;
+        private readonly string _streamReadTimeoutMessage;
 
         public LivestreamerProcess(MainForm parent, string modelName)
         {
@@ -47,6 +48,8 @@ namespace cb_downloader_v2
             _modelName = modelName;
             _streamInvalidUsernameMessage =
                 "error: Unable to open URL: http://chaturbate.com/" + _modelName + " (404 Client Error: Not Found)";
+            _streamReadTimeoutMessage =
+                "error: Unable to open URL: http://chaturbate.com/" + _modelName + " (HTTPSConnectionPool(host='chaturbate.com', port=443): Read timed out.)";
         }
 
         public void Start(bool quickStart = false)
@@ -161,7 +164,7 @@ namespace cb_downloader_v2
             }
 
             // Checking if stream is offline
-            if (line.StartsWith(StreamOfflineMessagePart))
+            if (line.StartsWith(StreamOfflineMessagePart) || line.Contains(_streamReadTimeoutMessage))
             {
                 Logger.Log(_modelName, "Offline");
 
