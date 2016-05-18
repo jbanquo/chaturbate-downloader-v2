@@ -10,11 +10,11 @@ namespace cb_downloader_v2
         public static string LogFileName { get; set; } = "logs.txt";
         public static bool LogToFile { get; set; } = false;
 
-        public static void Log(string modelName, string line)
+        public static void Log(string line)
         {
-            string log = DateTime.Now.ToString("s") + " " + modelName + " " + line;
-            
-            // Print line if in debug mode
+            string log = DateTime.Now.ToString("s") + " " + line;
+
+            // Print in output if in debug mode
 #if DEBUG
             Debug.WriteLine(log);
 #endif
@@ -31,6 +31,11 @@ namespace cb_downloader_v2
                     // ignored
                 }
             }
+        }
+
+        public static void Log(string modelName, string line)
+        {
+            Log(modelName + " " + line);
         }
     }
 }
