@@ -87,13 +87,8 @@ namespace cb_downloader_v2
 
             if (m.Success) // if cb link
             {
-                // parse out model name
-                if (modelName.EndsWith("/"))
-                {
-                    modelName = modelName.Substring(0, modelName.Length);
-                }
-
-                // find last slash
+                // find last slash after removing the terminal one, if present
+                modelName = modelName.TrimEnd('/');
                 int lastSlshIdx = modelName.LastIndexOf('/');
 
                 if (lastSlshIdx == -1)
@@ -104,10 +99,6 @@ namespace cb_downloader_v2
                 else
                 {
                     modelName = modelName.Substring(lastSlshIdx + 1);
-
-#if DEBUG
-                    Debug.WriteLine("Converted Chaturbate link into model name: " + modelName);
-#endif
                     return modelName;
                 }
             }
