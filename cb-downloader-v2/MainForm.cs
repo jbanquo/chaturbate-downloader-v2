@@ -346,13 +346,10 @@ namespace cb_downloader_v2
 
         private void restartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int idx = modelsBox.SelectedIndex;
+            string modelName = GetSelectedModelName();
 
-            // Validating item
-            if (idx == -1)
+            if (modelName == null)
                 return;
-
-            string modelName = modelsBox.Items[idx].ToString();
 
             // Fetching process
             LivestreamerProcess listener = _listeners[modelName];
@@ -397,6 +394,17 @@ namespace cb_downloader_v2
                 _listeners.TryRemove(modelName, out output);
                 Logger.Log(modelName, "Remove all unchecked");
             }
+        }
+
+        private string GetSelectedModelName()
+        {
+            int idx = modelsBox.SelectedIndex;
+
+            // Validating index
+            if (idx == -1)
+                return null;
+
+            return modelsBox.Items[idx].ToString();
         }
     }
 }
