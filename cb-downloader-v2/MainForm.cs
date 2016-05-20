@@ -342,5 +342,21 @@ namespace cb_downloader_v2
             logToolStripMenuItem.Checked = !logToolStripMenuItem.Checked;
             Logger.LogToFile = logToolStripMenuItem.Checked;
         }
+
+        private void restartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int idx = modelsBox.SelectedIndex;
+
+            // Validating item
+            if (idx == -1)
+                return;
+
+            string modelName = modelsBox.Items[idx].ToString();
+
+            // Fetching process
+            LivestreamerProcess listener = _listeners[modelName];
+            listener.Start(true);
+            Logger.Log(modelName, "Manual restart");
+        }
     }
 }

@@ -40,6 +40,7 @@
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quickAddModelButton = new System.Windows.Forms.Button();
+            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -59,15 +60,16 @@
             // modelsBoxCtxMenu
             // 
             this.modelsBoxCtxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.removeMenuItem});
+            this.removeMenuItem,
+            this.restartToolStripMenuItem});
             this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
             this.modelsBoxCtxMenu.ShowImageMargin = false;
-            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(93, 26);
+            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(128, 70);
             // 
             // removeMenuItem
             // 
             this.removeMenuItem.Name = "removeMenuItem";
-            this.removeMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.removeMenuItem.Size = new System.Drawing.Size(127, 22);
             this.removeMenuItem.Text = "Remove";
             this.removeMenuItem.Click += new System.EventHandler(this.removeMenuItem_Click);
             // 
@@ -123,14 +125,14 @@
             // 
             this.saveModelsToolStripMenuItem.Name = "saveModelsToolStripMenuItem";
             this.saveModelsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveModelsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.saveModelsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.saveModelsToolStripMenuItem.Text = "Save Models...";
             this.saveModelsToolStripMenuItem.Click += new System.EventHandler(this.saveModelsToolStripMenuItem_Click);
             // 
             // logToolStripMenuItem
             // 
             this.logToolStripMenuItem.Name = "logToolStripMenuItem";
-            this.logToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.logToolStripMenuItem.Text = "Log Debug Output";
             this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
             // 
@@ -143,6 +145,13 @@
             this.quickAddModelButton.Text = "Quick Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
+            // 
+            // restartToolStripMenuItem
+            // 
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
+            this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -182,6 +191,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveModelsToolStripMenuItem;
         private System.Windows.Forms.Button quickAddModelButton;
         private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
     }
 }
 
