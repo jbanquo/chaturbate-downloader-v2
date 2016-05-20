@@ -61,7 +61,7 @@ namespace cb_downloader_v2
             // Checking input validity
             if (string.IsNullOrWhiteSpace(modelName))
             {
-//                MessageBox.Show(this, "Invalid model name, cannot be empty or whitespace.", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Information);
+//                MessageBox.Show(this, "Invalid model name, cannot be empty or whitespace.", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -77,7 +77,6 @@ namespace cb_downloader_v2
             _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
 
             // Quick start functionality (i.e. start listener immediately)
-            // XXX this may cause issues
             proc.Start(quickStart);
         }
 
@@ -94,7 +93,7 @@ namespace cb_downloader_v2
 
                 if (lastSlshIdx == -1)
                 {
-                    // this should NEVER occur
+                    // this should NEVER occur due the applied regex
                     return "";
                 }
                 else
@@ -405,6 +404,14 @@ namespace cb_downloader_v2
                 return null;
 
             return modelsBox.Items[idx].ToString();
+        }
+
+        private void modelsBoxCtxMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Disable selected elements if selectedindex=-1
+            int idx = modelsBox.SelectedIndex;
+            removeMenuItem.Enabled = idx != -1;
+            restartToolStripMenuItem.Enabled = idx != -1;
         }
     }
 }

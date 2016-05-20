@@ -32,6 +32,8 @@
             this.modelsBox = new System.Windows.Forms.CheckedListBox();
             this.modelsBoxCtxMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeAllUncheckedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
             this.addModelButton = new System.Windows.Forms.Button();
@@ -40,8 +42,6 @@
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quickAddModelButton = new System.Windows.Forms.Button();
-            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeAllUncheckedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -67,13 +67,28 @@
             this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
             this.modelsBoxCtxMenu.ShowImageMargin = false;
             this.modelsBoxCtxMenu.Size = new System.Drawing.Size(172, 92);
+            this.modelsBoxCtxMenu.Opening += new System.ComponentModel.CancelEventHandler(this.modelsBoxCtxMenu_Opening);
             // 
             // removeMenuItem
             // 
             this.removeMenuItem.Name = "removeMenuItem";
-            this.removeMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.removeMenuItem.Size = new System.Drawing.Size(171, 22);
             this.removeMenuItem.Text = "Remove";
             this.removeMenuItem.Click += new System.EventHandler(this.removeMenuItem_Click);
+            // 
+            // restartToolStripMenuItem
+            // 
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
+            this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
+            // 
+            // removeAllUncheckedToolStripMenuItem
+            // 
+            this.removeAllUncheckedToolStripMenuItem.Name = "removeAllUncheckedToolStripMenuItem";
+            this.removeAllUncheckedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.removeAllUncheckedToolStripMenuItem.Text = "Remove All Unchecked";
+            this.removeAllUncheckedToolStripMenuItem.Click += new System.EventHandler(this.removeAllUncheckedToolStripMenuItem_Click_1);
             // 
             // modelsGroupBox
             // 
@@ -147,20 +162,6 @@
             this.quickAddModelButton.Text = "Quick Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
-            // 
-            // restartToolStripMenuItem
-            // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
-            this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
-            // 
-            // removeAllUncheckedToolStripMenuItem
-            // 
-            this.removeAllUncheckedToolStripMenuItem.Name = "removeAllUncheckedToolStripMenuItem";
-            this.removeAllUncheckedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.removeAllUncheckedToolStripMenuItem.Text = "Remove All Unchecked";
-            this.removeAllUncheckedToolStripMenuItem.Click += new System.EventHandler(this.removeAllUncheckedToolStripMenuItem_Click_1);
             // 
             // MainForm
             // 
