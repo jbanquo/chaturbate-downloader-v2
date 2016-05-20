@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -357,6 +358,41 @@ namespace cb_downloader_v2
             LivestreamerProcess listener = _listeners[modelName];
             listener.Start(true);
             Logger.Log(modelName, "Manual restart");
+        }
+
+        private void removeAllUncheckedToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            // Gather IDs
+            ArrayList modelIds = new ArrayList();
+
+            for (int i = 0; i < modelsBox.Items.Count; i++)
+            {
+                if (modelsBox.GetItemCheckState(i) == CheckState.Unchecked)
+                {
+                    modelIds.Add(i);
+                }
+            }
+
+            // Reverse so we start at the end, or as we remove elements the indexes will be incorrect
+            modelIds.Reverse();
+
+            // Batch remove
+            foreach (int id in modelIds)
+            {
+                string modelName = modelsBox.Items[id].ToString();
+
+                // Fetching process
+                LivestreamerProcess listener = _listeners[modelName];
+
+                // Initiating termination
+                listener.Terminate();
+
+                // Removing listener from lists
+                modelsBox.Items.RemoveAt(id);
+                LivestreamerProcess output;
+                _listeners.TryRemove(modelName, out output);
+                Logger.Log(modelName, "Remove all unchecked");
+            }
         }
     }
 }

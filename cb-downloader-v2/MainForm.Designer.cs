@@ -41,6 +41,7 @@
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quickAddModelButton = new System.Windows.Forms.Button();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeAllUncheckedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsBoxCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -61,10 +62,11 @@
             // 
             this.modelsBoxCtxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.removeMenuItem,
-            this.restartToolStripMenuItem});
+            this.restartToolStripMenuItem,
+            this.removeAllUncheckedToolStripMenuItem});
             this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
             this.modelsBoxCtxMenu.ShowImageMargin = false;
-            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(128, 70);
+            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(172, 92);
             // 
             // removeMenuItem
             // 
@@ -153,6 +155,13 @@
             this.restartToolStripMenuItem.Text = "Restart";
             this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
             // 
+            // removeAllUncheckedToolStripMenuItem
+            // 
+            this.removeAllUncheckedToolStripMenuItem.Name = "removeAllUncheckedToolStripMenuItem";
+            this.removeAllUncheckedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.removeAllUncheckedToolStripMenuItem.Text = "Remove All Unchecked";
+            this.removeAllUncheckedToolStripMenuItem.Click += new System.EventHandler(this.removeAllUncheckedToolStripMenuItem_Click_1);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -192,6 +201,7 @@
         private System.Windows.Forms.Button quickAddModelButton;
         private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeAllUncheckedToolStripMenuItem;
     }
 }
 
