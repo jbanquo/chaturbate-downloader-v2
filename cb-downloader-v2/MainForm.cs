@@ -356,8 +356,12 @@ namespace cb_downloader_v2
 
             // Fetching process
             LivestreamerProcess listener = _listeners[modelName];
-            listener.Start(true);
-            Logger.Log(modelName, "Manual restart");
+
+            if (!listener.IsRunning)
+            {
+                listener.Start(true);
+                Logger.Log(modelName, "Manual restart");
+            }
         }
 
         private void removeAllUncheckedToolStripMenuItem_Click_1(object sender, EventArgs e)
