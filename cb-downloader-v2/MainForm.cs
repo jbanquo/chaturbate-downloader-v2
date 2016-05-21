@@ -408,10 +408,35 @@ namespace cb_downloader_v2
 
         private void modelsBoxCtxMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // Disable selected elements if selectedindex=-1
             int idx = modelsBox.SelectedIndex;
+
+            //  Disable element if selectedindex=-1
             removeMenuItem.Enabled = idx != -1;
-            restartToolStripMenuItem.Enabled = idx != -1;
+
+            //  Disable element if selectedindex=-1 not checked
+            restartToolStripMenuItem.Enabled = idx != -1
+                && modelsBox.GetItemCheckState(idx) == CheckState.Unchecked;
+
+            // if there is more than 0 unchecked models
+            removeAllUncheckedToolStripMenuItem.Enabled = ModelsStateCount(CheckState.Unchecked) > 0;
+        }
+
+        /// <summary>
+        ///     Counts the amount of models in the modelsBox with the given
+        ///     CheckState.
+        /// </summary>
+        /// <param name="target">The checkstate to count for.</param>
+        /// <returns></returns>
+        private int ModelsStateCount(CheckState target)
+        {
+            int count = 0;
+
+            for (int i = 0; i < modelsBox.Items.Count; i++)
+            {
+                if (modelsBox.GetItemCheckState(i) == target)
+                    count++;
+            }
+            return count;
         }
     }
 }
