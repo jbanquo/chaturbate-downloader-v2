@@ -41,6 +41,7 @@ namespace cb_downloader_v2
         public int RestartTime { get; private set; }
         private readonly string _streamInvalidUsernameMessage;
         private readonly string _streamReadTimeoutMessage;
+        private bool _handledTermination;
 
         public LivestreamerProcess(MainForm parent, string modelName)
         {
@@ -85,6 +86,7 @@ namespace cb_downloader_v2
 
                 // Updating flags and starting process
                 RestartRequired = false;
+                _handledTermination = false;
                 _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
@@ -118,8 +120,20 @@ namespace cb_downloader_v2
             // Checking if end of stream
             if (line == null)
             {
-                Logger.Log(_modelName, "End of stream");
-                return;
+                if (_handledTermination) // if already used custom termination logic
+                {
+                    return;
+                }
+                else
+                {
+                    Logger.Log(_modelName, "End of stream");
+
+                    // Terminating the thread and marking for a restart
+                    RestartRequired = true;
+                    RestartTime = 0;
+                    Terminate();
+                    return;
+                }
             }
 
             if (line.Length == 0)
@@ -197,6 +211,7 @@ namespace cb_downloader_v2
 
             // Uncheck on models list in form
             _mf.SetCheckState(_modelName, CheckState.Unchecked);
+            _handledTermination = true;
         }
     }
 }
