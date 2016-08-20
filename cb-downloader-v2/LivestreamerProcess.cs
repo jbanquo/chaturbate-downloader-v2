@@ -21,27 +21,14 @@ namespace cb_downloader_v2
         private readonly string _modelName;
         private CancellationTokenSource _cancelToken;
         private Process _process;
-
-        public bool IsRunning
-        {
-            get
-            {
-                // TODO clean up
-                try
-                {
-                    return _process != null && Started && !_process.HasExited;
-                } catch (Exception) {
-                    return false;
-                }
-            }
-        }
-
-        private bool Started { get; set; }
+        public bool Running { get; private set; }
         public bool RestartRequired { get; private set; } = true;
         public int RestartTime { get; private set; }
+        public bool CanRestart => RestartRequired && !Running && Environment.TickCount > RestartTime;
+        private int StandardRestartDelay => Environment.TickCount + RestartDelay;
+
         private readonly string _streamInvalidUsernameMessage;
         private readonly string _streamReadTimeoutMessage;
-        private bool _handledTermination;
 
         public LivestreamerProcess(MainForm parent, string modelName)
         {
@@ -55,7 +42,7 @@ namespace cb_downloader_v2
 
         public void Start(bool quickStart = false)
         {
-            // Checking if a process is not already running
+            // Checking if a process is already running
             if (_process != null)
                 return;
 
@@ -86,11 +73,10 @@ namespace cb_downloader_v2
 
                 // Updating flags and starting process
                 RestartRequired = false;
-                _handledTermination = false;
                 _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
-                Started = true;
+                Running = true;
                 _mf.SetCheckState(_modelName, CheckState.Checked);
                 Logger.Log(_modelName, "Started");
             }, _cancelToken.Token);
@@ -117,51 +103,31 @@ namespace cb_downloader_v2
         {
             string line = e.Data;
 
-            // Checking if end of stream
-            if (line == null)
-            {
-                if (_handledTermination) // if already used custom termination logic
-                {
-                    return;
-                }
-                else
-                {
-                    Logger.Log(_modelName, "End of stream");
-
-                    // Terminating the thread and marking for a restart
-                    RestartRequired = true;
-                    RestartTime = 0;
-                    Terminate();
-                    return;
-                }
-            }
-
-            if (line.Length == 0)
+            // Checking if data is valid
+            if (line == null) {
+				Logger.Log(_modelName, "End of stream");
+                Terminate(true); // custom errors are usually fired before this, so this becomes ignored
                 return;
+			}
+			
+			if (line.Length == 0)
+				return;
             
             // Parsing line
             Logger.Log(_modelName, "[raw]" + line);
 
-            // Checking if the stream was terminated
+            // Checking if the stream was terminated server-side
             if (line.Equals(StreamTerminatedMessage))
             {
                 Logger.Log(_modelName, "Terminated");
-
-                // Terminating the thread and marking for a restart
-                RestartRequired = true;
-                RestartTime = 0;
-                Terminate();
+                Terminate(true);
             }
 
             // Checking if service is offline (i.e. being ddosed)
             if (line.Contains(StreamServiceUnavailablePart))
             {
                 Logger.Log(_modelName, "Service Unavailable");
-
-                // Terminating the thread and marking for a delayed restart
-                RestartRequired = true;
-                RestartTime = Environment.TickCount + RestartDelay;
-                Terminate();
+                Terminate(true, StandardRestartDelay);
             }
 
             // Checking if the username is invalid
@@ -169,11 +135,10 @@ namespace cb_downloader_v2
             {
                 Logger.Log(_modelName, "Invalid username (404)");
 
-                // Terminating the thread and marking as invalid url
-                RestartRequired = false;
+                // Terminating the thread and marking it as an invalid url
                 Terminate();
 
-                // Removing process from GUI
+                // Removing model from GUI
                 _mf.RemoveInvalidUrlModel(_modelName, this);
             }
 
@@ -181,37 +146,47 @@ namespace cb_downloader_v2
             if (line.StartsWith(StreamOfflineMessagePart) || line.Contains(_streamReadTimeoutMessage))
             {
                 Logger.Log(_modelName, "Offline");
-
-                // Terminating the thread and marking for a delayed restart
-                RestartRequired = true;
-                RestartTime = Environment.TickCount + RestartDelay;
-                Terminate();
+                Terminate(true, StandardRestartDelay);
             }
         }
 
-        public void Terminate()
+        public void Terminate(bool restartRequired = false, int restartTime = 0)
         {
+            // Checking if process is existent/running
+            if (_process == null || !Running)
+                return;
+
+            // Update flags
+            RestartRequired = restartRequired;
+            RestartTime = restartTime;
+
             // Activate cancellation token
             if (_cancelToken != null && !_cancelToken.IsCancellationRequested)
             {
                 _cancelToken.Cancel();
             }
 
-            // Checking if process is existent
-            if (_process == null)
-                return;
-
             // Attempting to close process
-            if (IsRunning)
+            if (_process != null)
             {
-                _process.Kill();
-                _process.Close();
+                try
+                {
+                    _process.Kill();
+                }
+                catch
+                {
+                    // ignored
+                }
+                finally
+                {
+                    _process.Close();
+                    _process = null;
+                }
             }
-            _process = null;
 
             // Uncheck on models list in form
             _mf.SetCheckState(_modelName, CheckState.Unchecked);
-            _handledTermination = true;
+            Running = false;
         }
     }
 }

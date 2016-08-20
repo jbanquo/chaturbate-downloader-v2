@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,6 +19,7 @@ namespace cb_downloader_v2
         private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();
         private Thread _listenerThread;
         private readonly Regex _chaturbateLinkRegex = new Regex(@"^(https?:\/\/)?chaturbate\.com\/[\da-zA-Z_]+\/?$"); // XXX add more domains (i.e. de)
+		// TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
         /// <summary>
         ///     Whether or not the modelsBox allows checking of items.
         /// </summary>
@@ -94,18 +94,16 @@ namespace cb_downloader_v2
                 if (lastSlshIdx == -1)
                 {
                     // this should NEVER occur due the applied regex
-                    return "";
+                    return null;
                 }
-                else
-                {
-                    modelName = modelName.Substring(lastSlshIdx + 1);
-                    return modelName;
-                }
+
+                // Return the model name without the slash
+                modelName = modelName.Substring(lastSlshIdx + 1);
+                return modelName;
             }
-            else // if not
-            {
-                return modelName.Trim(' ', '\t', '/', '\\');
-            }
+            
+            // If not a cb link, ie assume its a model name
+            return modelName.Trim(' ', '\t', '/', '\\');
         }
 
         private void InitializeListener()
@@ -134,7 +132,7 @@ namespace cb_downloader_v2
                     LivestreamerProcess proc = valuePair.Value;
 
                     // Checking if a (re)start is required
-                    if (proc.RestartRequired && !proc.IsRunning && Environment.TickCount > proc.RestartTime)
+                    if (proc.CanRestart)
                     {
                         proc.Start();
                     }
@@ -353,11 +351,13 @@ namespace cb_downloader_v2
             // Fetching process
             LivestreamerProcess listener = _listeners[modelName];
 
-            if (!listener.IsRunning)
-            {
-                listener.Start(true);
-                Logger.Log(modelName, "Manual restart");
-            }
+            // Cancel restart if the listener is already running
+            if (listener.Running)
+                return;
+
+            // Otherwise, continue with the manual start
+            listener.Start(true);
+            Logger.Log(modelName, "Manual restart");
         }
 
         private void removeAllUncheckedToolStripMenuItem_Click_1(object sender, EventArgs e)
