@@ -56,7 +56,7 @@ namespace cb_downloader_v2
         private void AddUser(string modelName, bool quickStart = false)
         {
             // Normalising name
-            modelName = NormaliseModelName(modelName);
+            modelName = NormaliseModelName(modelName).ToLower();
 
             // Checking input validity
             if (string.IsNullOrWhiteSpace(modelName))
