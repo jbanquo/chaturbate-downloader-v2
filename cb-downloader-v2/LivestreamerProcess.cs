@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -9,6 +10,7 @@ namespace cb_downloader_v2
 {
     public class LivestreamerProcess
     {
+        // NOTE: issues occur when, i.e. you close the app and THEN a stream begins being listened to (i.e. this is not terminated), etc.
         private static readonly Random Random = new Random();
         private const string StreamTerminatedMessage = "[cli][info] Stream ended";
         private const string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
@@ -55,7 +57,7 @@ namespace cb_downloader_v2
             {
                 StartInfo =
                 {
-                    FileName = "livestreamer.exe",
+                    FileName = "streamlink.exe",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -79,6 +81,13 @@ namespace cb_downloader_v2
                 Running = true;
                 _mf.SetCheckState(_modelName, CheckState.Checked);
                 Logger.Log(_modelName, "Started");
+
+                // Check if cancellation was called
+                if (_cancelToken.IsCancellationRequested)
+                {
+                    Terminate();
+                    _cancelToken.Token.ThrowIfCancellationRequested();
+                }
             }, _cancelToken.Token);
         }
 
@@ -167,26 +176,60 @@ namespace cb_downloader_v2
             }
 
             // Attempting to close process
-            if (_process != null)
+            try
             {
-                try
+                if (_process != null)
                 {
-                    _process.Kill();
+                    try
+                    {
+                        KillProcessTree(_process.Id);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                    finally
+                    {
+                        _process.Close();
+                        _process = null;
+                    }
                 }
-                catch
-                {
-                    // ignored
-                }
-                finally
-                {
-                    _process.Close();
-                    _process = null;
-                }
+            }
+            catch
+            {
+                // ignored
             }
 
             // Uncheck on models list in form
             _mf.SetCheckState(_modelName, CheckState.Unchecked);
             Running = false;
+        }
+
+        /// <summary>
+        ///     Kill a process, and all of its children, grandchildren, etc.
+        ///     Source: https://stackoverflow.com/questions/5901679/kill-process-tree-programatically-in-c-sharp?answertab=active#tab-top
+        /// </summary>
+        /// <param name="pid">Process ID.</param>
+        private static void KillProcessTree(int pid)
+        {
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher
+                ("Select * From Win32_Process Where ParentProcessID=" + pid);
+            ManagementObjectCollection moc = searcher.Get();
+
+            foreach (ManagementObject mo in moc)
+            {
+                KillProcessTree(Convert.ToInt32(mo["ProcessID"]));
+            }
+
+            try
+            {
+                Process proc = Process.GetProcessById(pid);
+                proc.Kill();
+            }
+            catch (ArgumentException)
+            {
+                // Process already exited.
+            }
         }
     }
 }
