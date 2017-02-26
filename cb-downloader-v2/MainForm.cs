@@ -31,6 +31,7 @@ namespace cb_downloader_v2
             PrepareOutputFolder();
             InitializeListener();
             LoadModelsFile();
+            LoadModelNamesResourceFile();
             // TODO check if livestreamer is installed/accessible
         }
 
@@ -51,6 +52,14 @@ namespace cb_downloader_v2
             {
                 AddUser(modelName);
             }
+        }
+
+        private void LoadModelNamesResourceFile()
+        {
+            string modelNames = EmbeddedResourceHelper.ReadText("cb_downloader_v2.models_list.txt");
+            AutoCompleteStringCollection col = new AutoCompleteStringCollection();
+            col.AddRange(Regex.Split(modelNames, "\r\n"));
+            modelNameTextBox.AutoCompleteCustomSource = col;
         }
 
         private void AddUser(string modelName, bool quickStart = false)

@@ -101,6 +101,8 @@
             // 
             // modelNameTextBox
             // 
+            this.modelNameTextBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.modelNameTextBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.modelNameTextBox.Location = new System.Drawing.Point(12, 327);
             this.modelNameTextBox.Name = "modelNameTextBox";
             this.modelNameTextBox.Size = new System.Drawing.Size(312, 20);
