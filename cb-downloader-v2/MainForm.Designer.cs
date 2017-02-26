@@ -36,7 +36,6 @@
             this.removeAllUncheckedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
-            this.addModelButton = new System.Windows.Forms.Button();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,7 +65,7 @@
             this.removeAllUncheckedToolStripMenuItem});
             this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
             this.modelsBoxCtxMenu.ShowImageMargin = false;
-            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(172, 92);
+            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(172, 70);
             this.modelsBoxCtxMenu.Opening += new System.ComponentModel.CancelEventHandler(this.modelsBoxCtxMenu_Opening);
             // 
             // removeMenuItem
@@ -104,20 +103,10 @@
             // 
             this.modelNameTextBox.Location = new System.Drawing.Point(12, 327);
             this.modelNameTextBox.Name = "modelNameTextBox";
-            this.modelNameTextBox.Size = new System.Drawing.Size(231, 20);
+            this.modelNameTextBox.Size = new System.Drawing.Size(312, 20);
             this.modelNameTextBox.TabIndex = 2;
             this.modelNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyDown);
             this.modelNameTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.modelNameTextBox_KeyUp);
-            // 
-            // addModelButton
-            // 
-            this.addModelButton.Location = new System.Drawing.Point(249, 325);
-            this.addModelButton.Name = "addModelButton";
-            this.addModelButton.Size = new System.Drawing.Size(75, 23);
-            this.addModelButton.TabIndex = 2;
-            this.addModelButton.Text = "Add";
-            this.addModelButton.UseVisualStyleBackColor = true;
-            this.addModelButton.Click += new System.EventHandler(this.addModelButton_Click);
             // 
             // menuStrip
             // 
@@ -159,7 +148,7 @@
             this.quickAddModelButton.Name = "quickAddModelButton";
             this.quickAddModelButton.Size = new System.Drawing.Size(75, 23);
             this.quickAddModelButton.TabIndex = 4;
-            this.quickAddModelButton.Text = "Quick Add";
+            this.quickAddModelButton.Text = "Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
             // 
@@ -171,7 +160,6 @@
             this.Controls.Add(this.quickAddModelButton);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.modelNameTextBox);
-            this.Controls.Add(this.addModelButton);
             this.Controls.Add(this.modelsGroupBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MainMenuStrip = this.menuStrip;
@@ -193,7 +181,6 @@
         private System.Windows.Forms.CheckedListBox modelsBox;
         private System.Windows.Forms.GroupBox modelsGroupBox;
         private System.Windows.Forms.TextBox modelNameTextBox;
-        private System.Windows.Forms.Button addModelButton;
         private System.Windows.Forms.ContextMenuStrip modelsBoxCtxMenu;
         private System.Windows.Forms.ToolStripMenuItem removeMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip;

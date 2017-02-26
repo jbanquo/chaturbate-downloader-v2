@@ -175,13 +175,6 @@ namespace cb_downloader_v2
             }
         }
 
-        private void addModelButton_Click(object sender, EventArgs e)
-        {
-            // Adding user to listener
-            AddUser(modelNameTextBox.Text);
-            modelNameTextBox.Text = "";
-        }
-
         private void quickAddModelButton_Click(object sender, EventArgs e)
         {
             // Adding user to listener and start immediately
