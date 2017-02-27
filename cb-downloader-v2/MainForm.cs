@@ -234,7 +234,7 @@ namespace cb_downloader_v2
             // Handling textbox enter key press
             if (e.KeyCode != Keys.Enter)
                 return;
-            AddUser(modelNameTextBox.Text);
+            AddUser(modelNameTextBox.Text, true);
             modelNameTextBox.Text = "";
             e.Handled = e.SuppressKeyPress = true;
         }
