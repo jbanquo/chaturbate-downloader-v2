@@ -32,7 +32,7 @@ namespace cb_downloader_v2
             InitializeListener();
             LoadModelsFile();
             LoadModelNamesResourceFile();
-            // TODO check if livestreamer is installed/accessible
+            // TODO check if streamlink is installed/accessible
         }
 
         private async void LoadModelsFile()
