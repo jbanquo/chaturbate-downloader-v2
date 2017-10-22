@@ -78,7 +78,7 @@ namespace cb_downloader_v2
 
             // Checking if the model is already being listened to
             if (modelsBox.Items.Cast<object>().Contains(modelName))
-                return;
+                return; // TODO restart stream instead
 
             // Create process and add listener to lists
             LivestreamerProcess proc = new LivestreamerProcess(this, modelName);
