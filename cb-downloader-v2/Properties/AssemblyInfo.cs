@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("cb-downloader-v2")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A chaturbate stream downloader.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("J. Banquo")]
 [assembly: AssemblyProduct("cb-downloader-v2")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright © 2017 J. Banquo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
