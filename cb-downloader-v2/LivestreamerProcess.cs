@@ -69,8 +69,8 @@ namespace cb_downloader_v2
             int delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
             Task.Delay(quickStart ? 100 : delay, _cancelToken.Token).ContinueWith(task =>
             {
-                // Cancel if process is null
-                if (_process == null)
+                // Cancel if process is null or cancellation is requested
+                if (_process == null | _cancelToken.IsCancellationRequested)
                     return;
 
                 // Updating flags and starting process
@@ -86,7 +86,6 @@ namespace cb_downloader_v2
                 if (_cancelToken.IsCancellationRequested)
                 {
                     Terminate();
-                    _cancelToken.Token.ThrowIfCancellationRequested();
                 }
             }, _cancelToken.Token);
         }
