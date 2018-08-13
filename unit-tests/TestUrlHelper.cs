@@ -41,5 +41,25 @@ namespace unit_tests
             Assert.IsTrue(UrlHelper.IsChaturbateUrl("https://de.chaturbate.com/model/"));
             Assert.IsFalse(UrlHelper.IsChaturbateUrl("https://chaturbate.de/model/"));
         }
+
+        [TestMethod]
+        public void TestGetModelName()
+        {
+            Assert.AreEqual("model", UrlHelper.GetModelName("chaturbate.com/model"));
+            Assert.AreEqual("model", UrlHelper.GetModelName("chaturbate.com/model/"));
+
+            Assert.AreEqual("model", UrlHelper.GetModelName("https://chaturbate.com/model/"));
+            Assert.AreEqual("model", UrlHelper.GetModelName("https://chaturbate.com/model/"));
+        }
+
+        [TestMethod]
+        public void TestGetModelName_UniversalURLs()
+        {
+            Assert.AreEqual("model", UrlHelper.GetModelName("de.chaturbate.com/model"));
+            Assert.AreEqual("model", UrlHelper.GetModelName("de.chaturbate.com/model/"));
+
+            Assert.AreEqual("model", UrlHelper.GetModelName("https://de.chaturbate.com/model/"));
+            Assert.AreEqual("model", UrlHelper.GetModelName("https://de.chaturbate.com/model/"));
+        }
     }
 }

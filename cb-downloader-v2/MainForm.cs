@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace cb_downloader_v2
@@ -16,8 +13,7 @@ namespace cb_downloader_v2
         public const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
-        private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
-        private Thread _listenerThread;
+        private DownloaderProcessManager _manager;
         // TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
         /// <summary>
         ///     Whether or not the modelsBox allows checking of items.
@@ -28,7 +24,7 @@ namespace cb_downloader_v2
         {
             InitializeComponent();
             PrepareOutputFolder();
-            InitializeListener();
+            InitializeManager();
             LoadModelsFile();
             LoadModelNamesResourceFile();
             // TODO check if streamlink is installed/accessible
@@ -49,7 +45,7 @@ namespace cb_downloader_v2
             foreach (string modelName in Regex.Split(models, "\r\n")
                 .Where(modelName => modelName.Length != 0 && !modelName.StartsWith("#")))
             {
-                AddUser(modelName);
+                _manager.AddModel(modelName);
             }
         }
 
@@ -61,100 +57,19 @@ namespace cb_downloader_v2
             modelNameTextBox.AutoCompleteCustomSource = col;
         }
 
-        private void AddUser(string modelName, bool quickStart = false)
+        private void InitializeManager()
         {
-            // Normalising name
-            modelName = NormaliseModelName(modelName).ToLower();
-
-            // Checking input validity
-            if (string.IsNullOrWhiteSpace(modelName))
-            {
-//                MessageBox.Show(this, "Invalid model name, cannot be empty or whitespace.", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            Logger.Log(modelName, "Added");
-
-            // Checking if the model is already being listened to
-            if (modelsBox.Items.Cast<object>().Contains(modelName))
-                return; // TODO restart stream instead
-
-            // Create process and add listener to lists
-            IDownloaderProcess proc = new LivestreamerProcess(this, modelName);
-            modelsBox.Items.Add(modelName);
-            _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
-
-            // Quick start functionality (i.e. start listener immediately)
-            proc.Start(quickStart);
-        }
-
-        private string NormaliseModelName(string modelName)
-        {
-            // Check if cb link or not
-            if (UrlHelper.IsChaturbateUrl(modelName))
-            {
-                // find last slash after removing the terminal one, if present
-                modelName = modelName.TrimEnd('/');
-                int lastSlshIdx = modelName.LastIndexOf('/');
-
-                if (lastSlshIdx == -1)
-                {
-                    // this should NEVER occur due the applied regex
-                    return null;
-                }
-
-                // Return the model name without the slash
-                modelName = modelName.Substring(lastSlshIdx + 1);
-                return modelName;
-            }
-            
-            // If not a cb link, ie assume its a model name
-            return modelName.Trim(' ', '\t', '/', '\\');
-        }
-
-        private void InitializeListener()
-        {
-            _listenerThread = new Thread(ListenerProcess);
-            _listenerThread.Start();
-        }
-
-        private void ListenerProcess()
-        {
-            while (true)
-            {
-                Thread.Sleep(ListenerSleepDelay);
-
-                // Skip iteration if no listeners are attached
-                if (_listeners.Count == 0)
-                    continue;
-
-                // Update cached time
-                TimeNow = DateTime.Now;
-
-                // Handling each listener
-                foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
-                {
-                    string modelName = valuePair.Key;
-                    IDownloaderProcess proc = valuePair.Value;
-
-                    // Checking if a (re)start is required
-                    if (proc.CanRestart())
-                    {
-                        proc.Start();
-                    }
-                }
-            }
+            _manager = new DownloaderProcessManager(this, modelsBox);
+            _manager.Start();
         }
 
         public void RemoveInvalidUrlModel(string modelName, LivestreamerProcess proc)
         {
-
             // Telling user URL was invalid
             Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
 
             // Removing from listeners
-            IDownloaderProcess output;
-            _listeners.TryRemove(modelName, out output);
+            _manager.RemoveModel(modelName);
 
             // Removing from UI
             modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
@@ -184,46 +99,22 @@ namespace cb_downloader_v2
         private void quickAddModelButton_Click(object sender, EventArgs e)
         {
             // Adding user to listener and start immediately
-            AddUser(modelNameTextBox.Text, true);
+            _manager.AddModel(modelNameTextBox.Text, true);
             modelNameTextBox.Text = "";
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Asking user to confirm action
-            if (_listeners.Count > 0 && MessageBox.Show(this, "Are you sure you want to quit, all active streams being listened to will be terminated.",
+            if (_manager.Count > 0 && MessageBox.Show(this, "Are you sure you want to quit, all active streams being listened to will be terminated.",
                 "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
             {
                 e.Cancel = true;
                 return;
             }
 
-            // Terminating manager thread
-            if (_listenerThread.IsAlive)
-            {
-                try
-                {
-                    _listenerThread.Abort();
-                }
-                catch (ThreadAbortException)
-                {
-                }
-            }
-
-            // Terminating operational threads/process
-            foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
-            {
-                // Fetching listener
-                string modelName = valuePair.Key;
-                IDownloaderProcess listener = valuePair.Value;
-
-                // Initiating termination
-                listener.Terminate();
-
-                // Removing listener from list
-                IDownloaderProcess output;
-                _listeners.TryRemove(modelName, out output);
-            }
+            // Terminating manager + download listeners
+            _manager.Stop();
         }
 
         private void modelNameTextBox_KeyUp(object sender, KeyEventArgs e)
@@ -231,7 +122,7 @@ namespace cb_downloader_v2
             // Handling textbox enter key press
             if (e.KeyCode != Keys.Enter)
                 return;
-            AddUser(modelNameTextBox.Text, true);
+            _manager.AddModel(modelNameTextBox.Text, true);
             modelNameTextBox.Text = "";
             e.Handled = e.SuppressKeyPress = true;
         }
@@ -280,15 +171,14 @@ namespace cb_downloader_v2
             string modelName = modelsBox.Items[idx].ToString();
 
             // Fetching process
-            IDownloaderProcess listener = _listeners[modelName];
+            IDownloaderProcess listener = _manager[modelName];
 
             // Initiating termination
             listener.Terminate();
 
             // Removing listener from lists
             modelsBox.Items.RemoveAt(idx);
-            IDownloaderProcess output;
-            _listeners.TryRemove(modelName, out output);
+            _manager.RemoveModel(modelName);
             Logger.Log(modelName, "Remove");
         }
 
@@ -348,7 +238,7 @@ namespace cb_downloader_v2
                 return;
 
             // Fetching process
-            IDownloaderProcess listener = _listeners[modelName];
+            IDownloaderProcess listener = _manager[modelName];
 
             // Cancel restart if the listener is already running
             if (listener.IsRunning())
@@ -381,15 +271,14 @@ namespace cb_downloader_v2
                 string modelName = modelsBox.Items[id].ToString();
 
                 // Fetching process
-                IDownloaderProcess listener = _listeners[modelName];
+                IDownloaderProcess listener = _manager[modelName];
 
                 // Initiating termination
                 listener.Terminate();
 
                 // Removing listener from lists
                 modelsBox.Items.RemoveAt(id);
-                IDownloaderProcess output;
-                _listeners.TryRemove(modelName, out output);
+                _manager.RemoveModel(modelName);
                 Logger.Log(modelName, "Remove all unchecked");
             }
         }
