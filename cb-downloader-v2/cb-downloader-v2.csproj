@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloaderProcessManager.cs" />
+    <Compile Include="IDownloaderProcessManager.cs" />
     <Compile Include="Utils\EmbeddedResourceHelper.cs" />
     <Compile Include="IDownloaderProcess.cs" />
     <Compile Include="LivestreamerProcess.cs" />

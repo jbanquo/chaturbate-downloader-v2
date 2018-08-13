@@ -8,7 +8,7 @@ using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
 {
-    class DownloaderProcessManager
+    class DownloaderProcessManager : IDownloaderProcessManager
     {
         public static DateTime TimeNow = DateTime.Now;
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();

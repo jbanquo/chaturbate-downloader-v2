@@ -14,7 +14,7 @@ namespace cb_downloader_v2
         public const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
-        private DownloaderProcessManager _manager;
+        private IDownloaderProcessManager _manager;
         // TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
         /// <summary>
         ///     Whether or not the modelsBox allows checking of items.
