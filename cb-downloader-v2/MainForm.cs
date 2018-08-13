@@ -70,10 +70,11 @@ namespace cb_downloader_v2
             Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
 
             // Removing from listeners
-            _manager.RemoveModel(modelName);
-
-            // Removing from UI
-            modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
+            if (_manager.RemoveModel(modelName))
+            {
+                // Removing from UI
+                modelsBox.Invoke((MethodInvoker)(() => modelsBox.Items.Remove(modelName)));
+            }
         }
 
         private void PrepareOutputFolder()
@@ -178,9 +179,15 @@ namespace cb_downloader_v2
             listener.Terminate();
 
             // Removing listener from lists
-            modelsBox.Items.RemoveAt(idx);
-            _manager.RemoveModel(modelName);
-            Logger.Log(modelName, "Remove");
+            if (_manager.RemoveModel(modelName))
+            {
+                modelsBox.Items.RemoveAt(idx);
+                Logger.Log(modelName, "Remove");
+            }
+            else
+            {
+                Logger.Log(modelName, "Remove failed");
+            }
         }
 
         private void saveModelsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -278,9 +285,11 @@ namespace cb_downloader_v2
                 listener.Terminate();
 
                 // Removing listener from lists
-                modelsBox.Items.RemoveAt(id);
-                _manager.RemoveModel(modelName);
-                Logger.Log(modelName, "Remove all unchecked");
+                if (_manager.RemoveModel(modelName))
+                {
+                    modelsBox.Items.RemoveAt(id);
+                    Logger.Log(modelName, "Remove all unchecked");
+                }
             }
         }
 
