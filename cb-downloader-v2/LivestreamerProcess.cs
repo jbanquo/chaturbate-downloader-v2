@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace cb_downloader_v2
 {
-    public class LivestreamerProcess
+    public class LivestreamerProcess : IDownloaderProcess
     {
         // NOTE: issues occur when, i.e. you close the app and THEN a stream begins being listened to (i.e. this is not terminated), etc.
         private static readonly Random Random = new Random();
@@ -23,10 +23,9 @@ namespace cb_downloader_v2
         private readonly string _modelName;
         private CancellationTokenSource _cancelToken;
         private Process _process;
-        public bool Running { get; private set; }
+        private bool Running { get; set; }
         public bool RestartRequired { get; private set; } = true;
         public int RestartTime { get; private set; }
-        public bool CanRestart => RestartRequired && !Running && Environment.TickCount > RestartTime;
         private int StandardRestartDelay => Environment.TickCount + RestartDelay;
 
         private readonly string _streamInvalidUsernameMessage;
@@ -57,7 +56,7 @@ namespace cb_downloader_v2
             {
                 StartInfo =
                 {
-                    FileName = "streamlink.exe",
+                    FileName = Properties.Settings.Default.StreamlinkExecutable,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -158,7 +157,12 @@ namespace cb_downloader_v2
             }
         }
 
-        public void Terminate(bool restartRequired = false, int restartTime = 0)
+        public void Terminate()
+        {
+            Terminate(false);
+        }
+        
+        public void Terminate(bool restartRequired, int restartTime = 0)
         {
             // Checking if process is existent/running
             if (_process == null || !Running)
@@ -229,6 +233,16 @@ namespace cb_downloader_v2
             {
                 // Process already exited.
             }
+        }
+
+        public bool CanRestart()
+        {
+            return RestartRequired && !Running && Environment.TickCount > RestartTime;
+        }
+
+        public bool IsRunning()
+        {
+            return Running;
         }
     }
 }

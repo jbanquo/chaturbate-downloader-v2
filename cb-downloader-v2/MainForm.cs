@@ -16,7 +16,7 @@ namespace cb_downloader_v2
         public const int ListenerSleepDelay = 60 * 1000;
         private const string ModelsFileName = "models.txt";
         public const string OutputFolderName = "Recordings";
-        private readonly ConcurrentDictionary<string, LivestreamerProcess> _listeners = new ConcurrentDictionary<string, LivestreamerProcess>();
+        private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
         private Thread _listenerThread;
         private readonly Regex _chaturbateLinkRegex = new Regex(@"^(https?:\/\/)?chaturbate\.com\/[\da-zA-Z_]+\/?$"); // XXX add more domains (i.e. de)
 		// TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
@@ -81,7 +81,7 @@ namespace cb_downloader_v2
                 return; // TODO restart stream instead
 
             // Create process and add listener to lists
-            LivestreamerProcess proc = new LivestreamerProcess(this, modelName);
+            IDownloaderProcess proc = new LivestreamerProcess(this, modelName);
             modelsBox.Items.Add(modelName);
             _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
 
@@ -135,13 +135,13 @@ namespace cb_downloader_v2
                 TimeNow = DateTime.Now;
 
                 // Handling each listener
-                foreach (KeyValuePair<string, LivestreamerProcess> valuePair in _listeners)
+                foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
                 {
                     string modelName = valuePair.Key;
-                    LivestreamerProcess proc = valuePair.Value;
+                    IDownloaderProcess proc = valuePair.Value;
 
                     // Checking if a (re)start is required
-                    if (proc.CanRestart)
+                    if (proc.CanRestart())
                     {
                         proc.Start();
                     }
@@ -156,7 +156,7 @@ namespace cb_downloader_v2
             Invoke((MethodInvoker)(() => MessageBox.Show(this, "Unregistered model detected: " + modelName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
 
             // Removing from listeners
-            LivestreamerProcess output;
+            IDownloaderProcess output;
             _listeners.TryRemove(modelName, out output);
 
             // Removing from UI
@@ -214,17 +214,17 @@ namespace cb_downloader_v2
             }
 
             // Terminating operational threads/process
-            foreach (KeyValuePair<string, LivestreamerProcess> valuePair in _listeners)
+            foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
             {
                 // Fetching listener
                 string modelName = valuePair.Key;
-                LivestreamerProcess listener = valuePair.Value;
+                IDownloaderProcess listener = valuePair.Value;
 
                 // Initiating termination
                 listener.Terminate();
 
                 // Removing listener from list
-                LivestreamerProcess output;
+                IDownloaderProcess output;
                 _listeners.TryRemove(modelName, out output);
             }
         }
@@ -283,14 +283,14 @@ namespace cb_downloader_v2
             string modelName = modelsBox.Items[idx].ToString();
 
             // Fetching process
-            LivestreamerProcess listener = _listeners[modelName];
+            IDownloaderProcess listener = _listeners[modelName];
 
             // Initiating termination
             listener.Terminate();
 
             // Removing listener from lists
             modelsBox.Items.RemoveAt(idx);
-            LivestreamerProcess output;
+            IDownloaderProcess output;
             _listeners.TryRemove(modelName, out output);
             Logger.Log(modelName, "Remove");
         }
@@ -351,10 +351,10 @@ namespace cb_downloader_v2
                 return;
 
             // Fetching process
-            LivestreamerProcess listener = _listeners[modelName];
+            IDownloaderProcess listener = _listeners[modelName];
 
             // Cancel restart if the listener is already running
-            if (listener.Running)
+            if (listener.IsRunning())
                 return;
 
             // Otherwise, continue with the manual start
@@ -384,14 +384,14 @@ namespace cb_downloader_v2
                 string modelName = modelsBox.Items[id].ToString();
 
                 // Fetching process
-                LivestreamerProcess listener = _listeners[modelName];
+                IDownloaderProcess listener = _listeners[modelName];
 
                 // Initiating termination
                 listener.Terminate();
 
                 // Removing listener from lists
                 modelsBox.Items.RemoveAt(id);
-                LivestreamerProcess output;
+                IDownloaderProcess output;
                 _listeners.TryRemove(modelName, out output);
                 Logger.Log(modelName, "Remove all unchecked");
             }
@@ -439,6 +439,13 @@ namespace cb_downloader_v2
                     count++;
             }
             return count;
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm form = new SettingsForm();
+            form.ShowDialog(this);
+            form.Dispose();
         }
     }
 }
