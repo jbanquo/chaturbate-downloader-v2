@@ -18,8 +18,7 @@ namespace cb_downloader_v2
         public const string OutputFolderName = "Recordings";
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
         private Thread _listenerThread;
-        private readonly Regex _chaturbateLinkRegex = new Regex(@"^(https?:\/\/)?chaturbate\.com\/[\da-zA-Z_]+\/?$"); // XXX add more domains (i.e. de)
-		// TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
+        // TODO fix issue where if you remove a model, it can still attempt to start it (something to do with task.delay/start pipeline i imagine)
         /// <summary>
         ///     Whether or not the modelsBox allows checking of items.
         /// </summary>
@@ -92,9 +91,7 @@ namespace cb_downloader_v2
         private string NormaliseModelName(string modelName)
         {
             // Check if cb link or not
-            Match m = _chaturbateLinkRegex.Match(modelName);
-
-            if (m.Success) // if cb link
+            if (UrlHelper.IsChaturbateUrl(modelName))
             {
                 // find last slash after removing the terminal one, if present
                 modelName = modelName.TrimEnd('/');
