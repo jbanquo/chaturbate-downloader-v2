@@ -9,7 +9,6 @@ namespace cb_downloader_v2
 {
     class DownloaderProcessManager
     {
-        public const int TickSleepDelay = 60 * 1000;
         public static DateTime TimeNow = DateTime.Now;
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
         private Thread _thread;
@@ -18,6 +17,7 @@ namespace cb_downloader_v2
 
         public bool Running => _thread != null && _thread.IsAlive;
         public int Count => _listeners.Count;
+        public int TickSleepDelay = 60 * 100;
 
         public DownloaderProcessManager(MainForm parent, ListBox modelsBox)
         {
