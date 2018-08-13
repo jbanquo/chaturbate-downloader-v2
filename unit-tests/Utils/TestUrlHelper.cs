@@ -1,7 +1,7 @@
-﻿using cb_downloader_v2;
+﻿using cb_downloader_v2.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace unit_tests
+namespace unit_tests.Utils
 {
     [TestClass]
     public class TestUrlHelper

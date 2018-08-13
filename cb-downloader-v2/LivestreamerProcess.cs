@@ -5,6 +5,7 @@ using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
 {

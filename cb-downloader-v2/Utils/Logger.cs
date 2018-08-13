@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace cb_downloader_v2
+namespace cb_downloader_v2.Utils
 {
     /// <summary>
     ///     A simple text file logger.

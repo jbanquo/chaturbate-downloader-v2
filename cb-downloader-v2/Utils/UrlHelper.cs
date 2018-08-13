@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace cb_downloader_v2
+namespace cb_downloader_v2.Utils
 {
     public class UrlHelper
     {

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 
-namespace cb_downloader_v2
+namespace cb_downloader_v2.Utils
 {
     class EmbeddedResourceHelper
     {

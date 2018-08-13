@@ -49,10 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloaderProcessManager.cs" />
-    <Compile Include="EmbeddedResourceHelper.cs" />
+    <Compile Include="Utils\EmbeddedResourceHelper.cs" />
     <Compile Include="IDownloaderProcess.cs" />
     <Compile Include="LivestreamerProcess.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Utils\Logger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,7 +67,7 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UrlHelper.cs" />
+    <Compile Include="Utils\UrlHelper.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

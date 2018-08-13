@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
 {

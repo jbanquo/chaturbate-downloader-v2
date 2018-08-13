@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
 {
