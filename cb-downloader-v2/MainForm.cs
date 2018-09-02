@@ -27,8 +27,18 @@ namespace cb_downloader_v2
             PrepareOutputFolder();
             InitializeManager();
             LoadModelsFile();
+            CheckStreamlinkInstall();
             LoadModelNamesResourceFile();
-            // TODO check if streamlink is installed/accessible
+        }
+
+        private void CheckStreamlinkInstall()
+        {
+            if (!FileHelper.IsFileAccessible(Properties.Settings.Default.StreamlinkExecutable))
+            {
+                MessageBox.Show(this, "'streamlink.exe' inaccessible, the application may fail to work properly.\r\n" +
+                                      "Please ensure it is either in the current working directory, or in your system path variable.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void LoadModelsFile()

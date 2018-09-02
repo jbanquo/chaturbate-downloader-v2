@@ -53,6 +53,7 @@
     <Compile Include="Utils\EmbeddedResourceHelper.cs" />
     <Compile Include="IDownloaderProcess.cs" />
     <Compile Include="LivestreamerProcess.cs" />
+    <Compile Include="Utils\FileHelper.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
