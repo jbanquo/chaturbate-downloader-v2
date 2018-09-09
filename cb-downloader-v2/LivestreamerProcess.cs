@@ -61,7 +61,7 @@ namespace cb_downloader_v2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    Arguments = string.Format(CommandArguments, _modelName, Quality, fileName)
+                    Arguments = GenerateArguments(fileName)
                 }
             };
             
@@ -88,6 +88,24 @@ namespace cb_downloader_v2
                     Terminate();
                 }
             }, _cancelToken.Token);
+        }
+
+        private string GenerateArguments(string fileName)
+        {
+            string args = string.Format(CommandArguments, _modelName, Quality, fileName);
+
+            // HTTP proxy settings
+            if (Properties.Settings.Default.UseHttpProxy)
+            {
+                args += $" --http-proxy \"{Properties.Settings.Default.HttpProxyUrl}\"";
+            }
+
+            // HTTPS proxy settings
+            if (Properties.Settings.Default.UseHttpsProxy)
+            {
+                args += $" --https-proxy \"{Properties.Settings.Default.HttpsProxyUrl}\"";
+            }
+            return args;
         }
 
         private string SeedFileName()

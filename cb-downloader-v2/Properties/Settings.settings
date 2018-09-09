@@ -5,5 +5,17 @@
     <Setting Name="StreamlinkExecutable" Type="System.String" Scope="User">
       <Value Profile="(Default)">streamlink.exe</Value>
     </Setting>
+    <Setting Name="UseHttpProxy" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="HttpProxyUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="UseHttpsProxy" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="HttpsProxyUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
