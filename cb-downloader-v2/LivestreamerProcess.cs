@@ -4,7 +4,6 @@ using System.IO;
 using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
@@ -13,13 +12,13 @@ namespace cb_downloader_v2
     {
         // NOTE: issues occur when, i.e. you close the app and THEN a stream begins being listened to (i.e. this is not terminated), etc.
         private static readonly Random Random = new Random();
-        private const string StreamTerminatedMessage = "[cli][info] Stream ended";
-        private const string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
-        private const string StreamOfflineMessagePart = "error: No streams found on this URL: ";
-        private const string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
-        private const string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
-        private const string Quality = "best";
-        private const int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
+        private static string StreamTerminatedMessage = "[cli][info] Stream ended";
+        private static string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
+        private static string StreamOfflineMessagePart = "error: No streams found on this URL: ";
+        private static string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
+        private static string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
+        private static string Quality = "best";
+        private static int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
         private readonly MainForm _mf;
         private readonly string _modelName;
         private CancellationTokenSource _cancelToken;
@@ -48,9 +47,11 @@ namespace cb_downloader_v2
             if (_process != null)
                 return;
 
+            _mf.SetStatus(_modelName, Status.Connecting);
+
             // Fetching file name
             _cancelToken = new CancellationTokenSource();
-            string fileName = SeedFileName();
+            var fileName = SeedFileName();
 
             // Create process
             _process = new Process
@@ -66,7 +67,7 @@ namespace cb_downloader_v2
             };
             
             // Delayed start, a tad bit randomised, to prevent massive cpu spikes
-            int delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
+            var delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
             Task.Delay(quickStart ? 100 : delay, _cancelToken.Token).ContinueWith(task =>
             {
                 // Cancel if process is null or cancellation is requested
@@ -79,7 +80,7 @@ namespace cb_downloader_v2
                 _process.Start();
                 _process.BeginOutputReadLine();
                 Running = true;
-                _mf.SetCheckState(_modelName, CheckState.Checked);
+                _mf.SetStatus(_modelName, Status.Connected);
                 Logger.Log(_modelName, "Started");
 
                 // Check if cancellation was called
@@ -110,7 +111,7 @@ namespace cb_downloader_v2
 
         private string SeedFileName()
         {
-            DateTime timeNow = MainForm.TimeNow;
+            DateTime timeNow = DateTime.Now;
             string date = timeNow.ToString("ddMMyy");
             string time = timeNow.ToString("hhmmss");
             string fileName = string.Format(FileNameTemplate, _modelName, date, time, "");
@@ -165,7 +166,7 @@ namespace cb_downloader_v2
                 Terminate();
 
                 // Removing model from GUI
-                _mf.RemoveInvalidUrlModel(_modelName, this);
+                _mf.RemoveInvalidUrlModel(_modelName);
             }
 
             // Checking if stream is offline
@@ -223,7 +224,7 @@ namespace cb_downloader_v2
             }
 
             // Uncheck on models list in form
-            _mf.SetCheckState(_modelName, CheckState.Unchecked);
+            _mf.SetStatus(_modelName, Status.Disconnected);
             Running = false;
         }
 

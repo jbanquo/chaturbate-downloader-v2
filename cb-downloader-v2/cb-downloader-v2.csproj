@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="DownloaderProcessManager.cs" />
     <Compile Include="IDownloaderProcessManager.cs" />
+    <Compile Include="Status.cs" />
     <Compile Include="Utils\EmbeddedResourceHelper.cs" />
     <Compile Include="IDownloaderProcess.cs" />
     <Compile Include="LivestreamerProcess.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ModelsGridWrapper.cs" />
     <Compile Include="Utils\UrlHelper.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

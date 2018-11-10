@@ -3,27 +3,25 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 using cb_downloader_v2.Utils;
 
 namespace cb_downloader_v2
 {
     class DownloaderProcessManager : IDownloaderProcessManager
     {
-        public static DateTime TimeNow = DateTime.Now;
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
+        private readonly MainForm _parent;
+        private readonly ModelsGridWrapper _models;
         private Thread _thread;
-        private MainForm _parent;
-        private ListBox _modelsBox;
 
         public bool Running => _thread != null && _thread.IsAlive;
         public int Count => _listeners.Count;
         public int TickSleepDelay = 60 * 100;
 
-        public DownloaderProcessManager(MainForm parent, ListBox modelsBox)
+        public DownloaderProcessManager(MainForm parent, ModelsGridWrapper models)
         {
             _parent = parent;
-            _modelsBox = modelsBox;
+            _models = models;
         }
         
         public void Start()
@@ -48,8 +46,7 @@ namespace cb_downloader_v2
                 listener.Terminate();
 
                 // Remove listener from list
-                IDownloaderProcess output;
-                _listeners.TryRemove(modelName, out output);
+                _listeners.TryRemove(modelName, out var output);
             }
         }
 
@@ -59,12 +56,8 @@ namespace cb_downloader_v2
             {
                 Thread.Sleep(TickSleepDelay);
 
-                // Update cached time
-                TimeNow = DateTime.Now;
-
                 // Restart processes where necessary
-                foreach (IDownloaderProcess process in _listeners.Values
-                    .Where(p => p.CanRestart()))
+                foreach (var process in _listeners.Values.Where(p => p.CanRestart()))
                 {
                     process.Start();
                 }
@@ -81,23 +74,22 @@ namespace cb_downloader_v2
                 return;
             
             // Check if the model is already being listened to
-            if (_modelsBox.Items.Cast<object>().Contains(modelName))
+            if (_models.Contains(modelName))
                 return;
 
             // Create process and add listener to lists
-            IDownloaderProcess proc = new LivestreamerProcess(_parent, modelName);
-            _modelsBox.Items.Add(modelName);
-            _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
+            IDownloaderProcess process = new LivestreamerProcess(_parent, modelName);
+            _models.AddModel(modelName);
+            _listeners.AddOrUpdate(modelName, process, (s, listener) => listener);
 
             // Quick start functionality (i.e. start listener immediately)
-            proc.Start(immediate);
+            process.Start(immediate);
             Logger.Log(modelName, "Added");
         }
 
         public bool RemoveModel(string modelName)
         {
-            IDownloaderProcess output;
-            return _listeners.TryRemove(modelName, out output);
+            return _listeners.TryRemove(modelName, out var output);
         }
 
         public string NormaliseModelName(string modelName)
