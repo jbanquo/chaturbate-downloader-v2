@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using cb_downloader_v2.Utils;
@@ -17,7 +20,7 @@ namespace cb_downloader_v2
         private static string StreamOfflineMessagePart = "error: No streams found on this URL: ";
         private static string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private static string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
-        private static string Quality = "best";
+        private static string DefaultQuality = "best";
         private static int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
         private readonly MainForm _mf;
         private readonly string _modelName;
@@ -52,27 +55,31 @@ namespace cb_downloader_v2
             // Fetching file name
             _cancelToken = new CancellationTokenSource();
             var fileName = SeedFileName();
-
-            // Create process
-            _process = new Process
-            {
-                StartInfo =
-                {
-                    FileName = Properties.Settings.Default.StreamlinkExecutable,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    Arguments = GenerateArguments(fileName)
-                }
-            };
             
             // Delayed start, a tad bit randomised, to prevent massive cpu spikes
             var delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
+
             Task.Delay(quickStart ? 100 : delay, _cancelToken.Token).ContinueWith(task =>
             {
-                // Cancel if process is null or cancellation is requested
-                if (_process == null | _cancelToken.IsCancellationRequested)
+                // Cancel if process cancellation is requested
+                if (_cancelToken.IsCancellationRequested)
                     return;
+
+                // Create process
+                var quality = QualityOptions();
+                var selectedQuality = SelectQuality(quality, Properties.Settings.Default.TargetQuality);
+                
+                _process = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = Properties.Settings.Default.StreamlinkExecutable,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        Arguments = GenerateArguments(fileName, selectedQuality)
+                    }
+                };
 
                 // Updating flags and starting process
                 RestartRequired = false;
@@ -91,9 +98,24 @@ namespace cb_downloader_v2
             }, _cancelToken.Token);
         }
 
-        private string GenerateArguments(string fileName)
+        private string SelectQuality(List<int> qualities, int targetQuality)
         {
-            string args = string.Format(CommandArguments, _modelName, Quality, fileName);
+            if (qualities == null)
+                return DefaultQuality;
+
+            foreach (var q in qualities)
+            {
+                if (q >= targetQuality)
+                {
+                    return q + "p";
+                }
+            }
+            return qualities.Last() + "p";
+        }
+
+        private string GenerateArguments(string fileName, string quality)
+        {
+            string args = string.Format(CommandArguments, _modelName, quality, fileName);
 
             // HTTP proxy settings
             if (Properties.Settings.Default.UseHttpProxy)
@@ -253,6 +275,52 @@ namespace cb_downloader_v2
             {
                 // Process already exited.
             }
+        }
+
+        private List<int> QualityOptions()
+        {
+            // Run process
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = Properties.Settings.Default.StreamlinkExecutable,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    Arguments = "http://chaturbate.com/" + _modelName
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            // Parse output
+            // e.g. 'Available streams: 240p (worst), 480p, 720p, 1080p (best)'
+            var streams = Regex.Split(output, Environment.NewLine)
+                .SingleOrDefault(l => l.StartsWith("Available streams: "));
+
+            if (string.IsNullOrEmpty(streams))
+            {
+                return null;
+            }
+
+            streams = streams.Replace("Available streams: ", "")
+                .Replace(" (worst)", "")
+                .Replace(" (best)", "")
+                .Replace("p", "");
+            return Regex.Split(streams, ", ")
+                .Select(x =>
+                {
+                    if (int.TryParse(x, out var result))
+                    {
+                        return result;
+                    }
+                    return -1;
+                })
+                .Where(x => x > 0)
+                .Distinct()
+                .ToList();
         }
 
         public bool CanRestart()

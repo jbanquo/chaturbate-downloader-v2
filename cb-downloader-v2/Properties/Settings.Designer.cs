@@ -82,5 +82,17 @@ namespace cb_downloader_v2.Properties {
                 this["HttpsProxyUrl"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1080")]
+        public int TargetQuality {
+            get {
+                return ((int)(this["TargetQuality"]));
+            }
+            set {
+                this["TargetQuality"] = value;
+            }
+        }
     }
 }

@@ -22,6 +22,9 @@ namespace cb_downloader_v2
             // Set HTTPS proxy details
             useHttpsProxyCheckBox.Checked = Properties.Settings.Default.UseHttpsProxy;
             httpsProxyTextBox.Text = Properties.Settings.Default.HttpsProxyUrl;
+
+            // Set target quality
+            targetQualityTextBox.Text = Properties.Settings.Default.TargetQuality.ToString();
         }
 
         private void browseStreamlinkExecutableButton_Click(object sender, EventArgs e)
@@ -50,6 +53,10 @@ namespace cb_downloader_v2
             // Set HTTPS proxy details
             Properties.Settings.Default.UseHttpsProxy = useHttpsProxyCheckBox.Checked;
             Properties.Settings.Default.HttpsProxyUrl = httpsProxyTextBox.Text;
+
+            // Set target quality
+            Properties.Settings.Default.TargetQuality = int.Parse(targetQualityTextBox.Text);
+
             Properties.Settings.Default.Save();
             Close();
         }

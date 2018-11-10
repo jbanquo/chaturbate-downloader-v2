@@ -37,6 +37,8 @@
             this.useHttpsProxyCheckBox = new System.Windows.Forms.CheckBox();
             this.httpsProxyTextBox = new System.Windows.Forms.TextBox();
             this.httpProxyTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.targetQualityTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -50,7 +52,7 @@
             // 
             // doneButton
             // 
-            this.doneButton.Location = new System.Drawing.Point(228, 84);
+            this.doneButton.Location = new System.Drawing.Point(227, 110);
             this.doneButton.Name = "doneButton";
             this.doneButton.Size = new System.Drawing.Size(75, 23);
             this.doneButton.TabIndex = 2;
@@ -77,7 +79,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(309, 84);
+            this.cancelButton.Location = new System.Drawing.Point(308, 110);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 3;
@@ -119,11 +121,29 @@
             this.httpProxyTextBox.Size = new System.Drawing.Size(253, 20);
             this.httpProxyTextBox.TabIndex = 9;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 87);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(73, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Target Quality";
+            // 
+            // targetQualityTextBox
+            // 
+            this.targetQualityTextBox.Location = new System.Drawing.Point(130, 84);
+            this.targetQualityTextBox.Name = "targetQualityTextBox";
+            this.targetQualityTextBox.Size = new System.Drawing.Size(254, 20);
+            this.targetQualityTextBox.TabIndex = 11;
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(395, 118);
+            this.ClientSize = new System.Drawing.Size(395, 143);
+            this.Controls.Add(this.targetQualityTextBox);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.httpProxyTextBox);
             this.Controls.Add(this.httpsProxyTextBox);
             this.Controls.Add(this.useHttpsProxyCheckBox);
@@ -153,5 +173,7 @@
         private System.Windows.Forms.CheckBox useHttpsProxyCheckBox;
         private System.Windows.Forms.TextBox httpsProxyTextBox;
         private System.Windows.Forms.TextBox httpProxyTextBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox targetQualityTextBox;
     }
 }
