@@ -9,7 +9,6 @@ namespace cb_downloader_v2
 {
     public partial class MainForm : Form
     {
-        public static readonly int ListenerSleepDelay = 60 * 1000;
         public static readonly string OutputFolderName = "Recordings";
         private static readonly string ModelsFileName = "models.txt";
         private IDownloaderProcessManager _manager;
@@ -33,7 +32,8 @@ namespace cb_downloader_v2
         {
             if (!FileHelper.IsFileAccessible(Properties.Settings.Default.StreamlinkExecutable))
             {
-                MessageBox.Show(this, "'streamlink.exe' inaccessible, the application may fail to work properly.\r\n" +
+                var binary = Properties.Settings.Default.StreamlinkExecutable;
+                MessageBox.Show(this, $"'{binary}' inaccessible, the application may fail to work properly.\r\n" +
                                       "Please ensure it is either in the current working directory, or in your system path variable.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

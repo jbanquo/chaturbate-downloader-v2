@@ -16,7 +16,7 @@ namespace cb_downloader_v2
 
         public bool Running => _thread != null && _thread.IsAlive;
         public int Count => _listeners.Count;
-        public int TickSleepDelay = 60 * 100;
+        public TimeSpan TickSleepDelay = TimeSpan.FromSeconds(2);
 
         public DownloaderProcessManager(MainForm parent, ModelsGridWrapper models)
         {
@@ -56,10 +56,15 @@ namespace cb_downloader_v2
             {
                 Thread.Sleep(TickSleepDelay);
 
-                // Restart processes where necessary
-                foreach (var process in _listeners.Values.Where(p => p.CanRestart()))
+                // Restart processes
+                var restartable = _listeners.Values.Where(p => p.CanRestart()).ToList();
+
+                for (var i = 0; i < restartable.Count; i++)
                 {
-                    process.Start();
+                    var process = restartable[i];
+                    var delay = (i + 1) * 500;
+                    Logger.Log(process.ModelName, $"Automated restart in {delay}ms");
+                    process.Start(delay);
                 }
             }
         }

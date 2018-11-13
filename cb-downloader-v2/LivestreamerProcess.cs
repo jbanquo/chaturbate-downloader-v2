@@ -21,45 +21,50 @@ namespace cb_downloader_v2
         private static string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private static string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
         private static string DefaultQuality = "best";
-        private static int RestartDelay = MainForm.ListenerSleepDelay - 15000; // XXX validate value
+        private static TimeSpan RestartDelay = TimeSpan.FromSeconds(5);
         private readonly MainForm _mf;
-        private readonly string _modelName;
         private CancellationTokenSource _cancelToken;
         private Process _process;
+        public string ModelName { get; }
         private bool Running { get; set; }
         public bool RestartRequired { get; private set; } = true;
-        public int RestartTime { get; private set; }
-        private int StandardRestartDelay => Environment.TickCount + RestartDelay;
+        public DateTimeOffset RestartTime { get; private set; }
+        private DateTimeOffset StandardRestartDelay => DateTimeOffset.UtcNow + RestartDelay;
 
         private readonly string _streamInvalidUsernameMessage;
         private readonly string _streamReadTimeoutMessage;
 
         public LivestreamerProcess(MainForm parent, string modelName)
         {
+            ModelName = modelName;
             _mf = parent;
-            _modelName = modelName;
             _streamInvalidUsernameMessage =
-                "error: Unable to open URL: http://chaturbate.com/" + _modelName + " (404 Client Error: Not Found)";
+                "error: Unable to open URL: http://chaturbate.com/" + ModelName + " (404 Client Error: Not Found)";
             _streamReadTimeoutMessage =
-                "error: Unable to open URL: http://chaturbate.com/" + _modelName + " (HTTPSConnectionPool(host='chaturbate.com', port=443): Read timed out.)";
+                "error: Unable to open URL: http://chaturbate.com/" + ModelName + " (HTTPSConnectionPool(host='chaturbate.com', port=443): Read timed out.)";
         }
 
         public void Start(bool quickStart = false)
+        {
+            // Delayed start, a tad bit randomised, to prevent massive cpu spikes
+            var delay = quickStart ? 100 : Random.Next(1000, 10000);
+            Start(delay);
+        }
+
+        public void Start(int delay)
         {
             // Checking if a process is already running
             if (_process != null)
                 return;
 
-            _mf.SetStatus(_modelName, Status.Connecting);
+            _mf.SetStatus(ModelName, Status.Connecting);
+            Logger.Log(ModelName, $"Connecting in {delay}ms...");
 
             // Fetching file name
             _cancelToken = new CancellationTokenSource();
             var fileName = SeedFileName();
-            
-            // Delayed start, a tad bit randomised, to prevent massive cpu spikes
-            var delay = Random.Next(100, MainForm.ListenerSleepDelay/2);
 
-            Task.Delay(quickStart ? 100 : delay, _cancelToken.Token).ContinueWith(task =>
+            Task.Delay(delay, _cancelToken.Token).ContinueWith(task =>
             {
                 // Cancel if process cancellation is requested
                 if (_cancelToken.IsCancellationRequested)
@@ -67,6 +72,7 @@ namespace cb_downloader_v2
 
                 // Create process
                 var quality = QualityOptions();
+                // TODO if stream does not exist, remove model
                 var selectedQuality = SelectQuality(quality, Properties.Settings.Default.TargetQuality);
                 
                 _process = new Process
@@ -87,8 +93,8 @@ namespace cb_downloader_v2
                 _process.Start();
                 _process.BeginOutputReadLine();
                 Running = true;
-                _mf.SetStatus(_modelName, Status.Connected);
-                Logger.Log(_modelName, "Started");
+                _mf.SetStatus(ModelName, Status.Connected);
+                Logger.Log(ModelName, "Started");
 
                 // Check if cancellation was called
                 if (_cancelToken.IsCancellationRequested)
@@ -115,7 +121,7 @@ namespace cb_downloader_v2
 
         private string GenerateArguments(string fileName, string quality)
         {
-            string args = string.Format(CommandArguments, _modelName, quality, fileName);
+            string args = string.Format(CommandArguments, ModelName, quality, fileName);
 
             // HTTP proxy settings
             if (Properties.Settings.Default.UseHttpProxy)
@@ -136,14 +142,14 @@ namespace cb_downloader_v2
             DateTime timeNow = DateTime.Now;
             string date = timeNow.ToString("ddMMyy");
             string time = timeNow.ToString("hhmmss");
-            string fileName = string.Format(FileNameTemplate, _modelName, date, time, "");
+            string fileName = string.Format(FileNameTemplate, ModelName, date, time, "");
 
             // Get a file name which is not in use
             int no = 0;
 
             while (File.Exists(fileName))
             {
-                fileName = string.Format(FileNameTemplate, _modelName, date, time, "-" + no++);
+                fileName = string.Format(FileNameTemplate, ModelName, date, time, "-" + no++);
             }
             return fileName;
         }
@@ -154,7 +160,7 @@ namespace cb_downloader_v2
 
             // Checking if data is valid
             if (line == null) {
-				Logger.Log(_modelName, "End of stream");
+				Logger.Log(ModelName, "End of stream");
                 Terminate(true); // custom errors are usually fired before this, so this becomes ignored
                 return;
 			}
@@ -163,38 +169,38 @@ namespace cb_downloader_v2
 				return;
             
             // Parsing line
-            Logger.Log(_modelName, "[raw]" + line);
+            Logger.Log(ModelName, "[raw]" + line);
 
             // Checking if the stream was terminated server-side
             if (line.Equals(StreamTerminatedMessage))
             {
-                Logger.Log(_modelName, "Terminated");
+                Logger.Log(ModelName, "Terminated");
                 Terminate(true);
             }
 
             // Checking if service is offline (i.e. being ddosed)
             if (line.Contains(StreamServiceUnavailablePart))
             {
-                Logger.Log(_modelName, "Service Unavailable");
+                Logger.Log(ModelName, "Service Unavailable");
                 Terminate(true, StandardRestartDelay);
             }
 
             // Checking if the username is invalid
             if (line.Contains(_streamInvalidUsernameMessage))
             {
-                Logger.Log(_modelName, "Invalid username (404)");
+                Logger.Log(ModelName, "Invalid username (404)");
 
                 // Terminating the thread and marking it as an invalid url
                 Terminate();
 
                 // Removing model from GUI
-                _mf.RemoveInvalidUrlModel(_modelName);
+                _mf.RemoveInvalidUrlModel(ModelName);
             }
 
             // Checking if stream is offline
             if (line.StartsWith(StreamOfflineMessagePart) || line.Contains(_streamReadTimeoutMessage))
             {
-                Logger.Log(_modelName, "Offline");
+                Logger.Log(ModelName, "Offline");
                 Terminate(true, StandardRestartDelay);
             }
         }
@@ -204,7 +210,7 @@ namespace cb_downloader_v2
             Terminate(false);
         }
         
-        public void Terminate(bool restartRequired, int restartTime = 0)
+        public void Terminate(bool restartRequired, DateTimeOffset? restartTime = null)
         {
             // Checking if process is existent/running
             if (_process == null || !Running)
@@ -212,7 +218,7 @@ namespace cb_downloader_v2
 
             // Update flags
             RestartRequired = restartRequired;
-            RestartTime = restartTime;
+            RestartTime = restartTime ?? DateTimeOffset.UtcNow;
 
             // Activate cancellation token
             if (_cancelToken != null && !_cancelToken.IsCancellationRequested)
@@ -246,7 +252,7 @@ namespace cb_downloader_v2
             }
 
             // Uncheck on models list in form
-            _mf.SetStatus(_modelName, Status.Disconnected);
+            _mf.SetStatus(ModelName, Status.Disconnected);
             Running = false;
         }
 
@@ -288,7 +294,7 @@ namespace cb_downloader_v2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    Arguments = "http://chaturbate.com/" + _modelName
+                    Arguments = "http://chaturbate.com/" + ModelName
                 }
             };
             process.Start();
@@ -325,7 +331,7 @@ namespace cb_downloader_v2
 
         public bool CanRestart()
         {
-            return RestartRequired && !Running && Environment.TickCount > RestartTime;
+            return RestartRequired && !Running && DateTimeOffset.UtcNow >= RestartTime;
         }
 
         public bool IsRunning()
