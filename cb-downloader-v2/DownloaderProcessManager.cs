@@ -16,7 +16,7 @@ namespace cb_downloader_v2
 
         public bool Running => _thread != null && _thread.IsAlive;
         public int Count => _listeners.Count;
-        public TimeSpan TickSleepDelay = TimeSpan.FromSeconds(2);
+        public TimeSpan TickSleepDelay = TimeSpan.FromSeconds(2.5);
 
         public DownloaderProcessManager(MainForm parent, ModelsGridWrapper models)
         {

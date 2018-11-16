@@ -17,19 +17,28 @@ namespace cb_downloader_v2
         private static readonly Random Random = new Random();
         private static string StreamTerminatedMessage = "[cli][info] Stream ended";
         private static string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
-        private static string StreamOfflineMessagePart = "error: No streams found on this URL: ";
+        private static string StreamOfflineMessagePart = "error: No playable streams found on this URL: ";
         private static string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private static string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
         private static string DefaultQuality = "best";
-        private static TimeSpan RestartDelay = TimeSpan.FromSeconds(5);
+        private static TimeSpan RestartDelay = TimeSpan.FromSeconds(10);
+        private static DateTimeOffset StandardRestartDelay => DateTimeOffset.UtcNow + RestartDelay;
         private readonly MainForm _mf;
+        private Status _status = Status.Disconnected;
         private CancellationTokenSource _cancelToken;
         private Process _process;
         public string ModelName { get; }
-        private bool Running { get; set; }
+        public Status Status
+        {
+            private set
+            {
+                _status = value;
+                _mf.SetStatus(ModelName, _status);
+            }
+            get => _status;
+        }
         public bool RestartRequired { get; private set; } = true;
         public DateTimeOffset RestartTime { get; private set; }
-        private DateTimeOffset StandardRestartDelay => DateTimeOffset.UtcNow + RestartDelay;
 
         private readonly string _streamInvalidUsernameMessage;
         private readonly string _streamReadTimeoutMessage;
@@ -56,8 +65,7 @@ namespace cb_downloader_v2
             // Checking if a process is already running
             if (_process != null)
                 return;
-
-            _mf.SetStatus(ModelName, Status.Connecting);
+            Status = Status.Connecting;
             Logger.Log(ModelName, $"Connecting in {delay}ms...");
 
             // Fetching file name
@@ -92,8 +100,7 @@ namespace cb_downloader_v2
                 _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
-                Running = true;
-                _mf.SetStatus(ModelName, Status.Connected);
+                Status = Status.Connected;
                 Logger.Log(ModelName, "Started");
 
                 // Check if cancellation was called
@@ -106,7 +113,7 @@ namespace cb_downloader_v2
 
         private string SelectQuality(List<int> qualities, int targetQuality)
         {
-            if (qualities == null)
+            if (qualities == null || qualities.Count == 0)
                 return DefaultQuality;
 
             foreach (var q in qualities)
@@ -116,12 +123,12 @@ namespace cb_downloader_v2
                     return q + "p";
                 }
             }
-            return qualities.Last() + "p";
+            return DefaultQuality;
         }
 
         private string GenerateArguments(string fileName, string quality)
         {
-            string args = string.Format(CommandArguments, ModelName, quality, fileName);
+            var args = string.Format(CommandArguments, ModelName, quality, fileName);
 
             // HTTP proxy settings
             if (Properties.Settings.Default.UseHttpProxy)
@@ -139,10 +146,10 @@ namespace cb_downloader_v2
 
         private string SeedFileName()
         {
-            DateTime timeNow = DateTime.Now;
-            string date = timeNow.ToString("ddMMyy");
-            string time = timeNow.ToString("hhmmss");
-            string fileName = string.Format(FileNameTemplate, ModelName, date, time, "");
+            var timeNow = DateTime.Now;
+            var date = timeNow.ToString("ddMMyy");
+            var time = timeNow.ToString("HHmmss");
+            var fileName = string.Format(FileNameTemplate, ModelName, date, time, "");
 
             // Get a file name which is not in use
             int no = 0;
@@ -156,7 +163,7 @@ namespace cb_downloader_v2
 
         private void LivestreamerProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            string line = e.Data;
+            var line = e.Data;
 
             // Checking if data is valid
             if (line == null) {
@@ -181,7 +188,7 @@ namespace cb_downloader_v2
             // Checking if service is offline (i.e. being ddosed)
             if (line.Contains(StreamServiceUnavailablePart))
             {
-                Logger.Log(ModelName, "Service Unavailable");
+                Logger.Log(ModelName, "Service unavailable");
                 Terminate(true, StandardRestartDelay);
             }
 
@@ -212,10 +219,6 @@ namespace cb_downloader_v2
         
         public void Terminate(bool restartRequired, DateTimeOffset? restartTime = null)
         {
-            // Checking if process is existent/running
-            if (_process == null || !Running)
-                return;
-
             // Update flags
             RestartRequired = restartRequired;
             RestartTime = restartTime ?? DateTimeOffset.UtcNow;
@@ -227,9 +230,9 @@ namespace cb_downloader_v2
             }
 
             // Attempting to close process
-            try
+            if (_process != null)
             {
-                if (_process != null)
+                try
                 {
                     try
                     {
@@ -245,15 +248,14 @@ namespace cb_downloader_v2
                         _process = null;
                     }
                 }
-            }
-            catch
-            {
-                // ignored
+                catch
+                {
+                    // ignored
+                }
             }
 
             // Uncheck on models list in form
-            _mf.SetStatus(ModelName, Status.Disconnected);
-            Running = false;
+            Status = Status.Disconnected;
         }
 
         /// <summary>
@@ -263,18 +265,17 @@ namespace cb_downloader_v2
         /// <param name="pid">Process ID.</param>
         private static void KillProcessTree(int pid)
         {
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher
-                ("Select * From Win32_Process Where ParentProcessID=" + pid);
-            ManagementObjectCollection moc = searcher.Get();
+            var searcher = new ManagementObjectSearcher("Select * From Win32_Process Where ParentProcessID=" + pid);
+            var moc = searcher.Get();
 
-            foreach (ManagementObject mo in moc)
+            foreach (var mo in moc)
             {
                 KillProcessTree(Convert.ToInt32(mo["ProcessID"]));
             }
 
             try
             {
-                Process proc = Process.GetProcessById(pid);
+                var proc = Process.GetProcessById(pid);
                 proc.Kill();
             }
             catch (ArgumentException)
@@ -331,12 +332,7 @@ namespace cb_downloader_v2
 
         public bool CanRestart()
         {
-            return RestartRequired && !Running && DateTimeOffset.UtcNow >= RestartTime;
-        }
-
-        public bool IsRunning()
-        {
-            return Running;
+            return RestartRequired && Status == Status.Disconnected && DateTimeOffset.UtcNow >= RestartTime;
         }
     }
 }

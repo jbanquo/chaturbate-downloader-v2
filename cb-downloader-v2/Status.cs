@@ -1,6 +1,6 @@
 ﻿namespace cb_downloader_v2
 {
-    enum Status
+    public enum Status
     {
         Connecting,
         Connected,

@@ -221,7 +221,7 @@ namespace cb_downloader_v2
                 var listener = _manager[modelName];
 
                 // Cancel restart if the listener is already running
-                if (listener.IsRunning())
+                if (listener.Status != Status.Disconnected)
                     return;
 
                 // Otherwise, continue with the manual start

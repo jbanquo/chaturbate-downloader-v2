@@ -4,9 +4,9 @@
     {
         string ModelName { get; }
 
-        bool CanRestart();
+        Status Status { get; }
 
-        bool IsRunning();
+        bool CanRestart();
 
         void Start(bool quickStart = false);
 
