@@ -168,7 +168,11 @@ namespace cb_downloader_v2
             // Checking if data is valid
             if (line == null) {
 				Logger.Log(ModelName, "End of stream");
-                Terminate(true); // custom errors are usually fired before this, so this becomes ignored
+
+                if (Status != Status.Disconnected) // if a custom errors is fired before this, this becomes ignored
+                {
+                    Terminate(true);
+                }
                 return;
 			}
 			
