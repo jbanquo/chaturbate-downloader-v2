@@ -36,16 +36,15 @@
             this.removeAllDisconnectedCtxMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
             this.modelsGrid = new System.Windows.Forms.DataGridView();
+            this.ModelName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ModelStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quickAddModelButton = new System.Windows.Forms.Button();
-            this.ModelName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ModelStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.modelsCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.modelsGrid)).BeginInit();
@@ -116,6 +115,20 @@
             this.modelsGrid.Size = new System.Drawing.Size(387, 267);
             this.modelsGrid.TabIndex = 0;
             // 
+            // ModelName
+            // 
+            this.ModelName.HeaderText = "Model";
+            this.ModelName.Name = "ModelName";
+            this.ModelName.ReadOnly = true;
+            this.ModelName.Width = 200;
+            // 
+            // ModelStatus
+            // 
+            this.ModelStatus.HeaderText = "Status";
+            this.ModelStatus.Name = "ModelStatus";
+            this.ModelStatus.ReadOnly = true;
+            this.ModelStatus.Width = 125;
+            // 
             // modelNameTextBox
             // 
             this.modelNameTextBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
@@ -141,7 +154,6 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveModelsToolStripMenuItem,
-            this.logToolStripMenuItem,
             this.toolStripMenuItem1,
             this.settingsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -155,13 +167,6 @@
             this.saveModelsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.saveModelsToolStripMenuItem.Text = "Save Models...";
             this.saveModelsToolStripMenuItem.Click += new System.EventHandler(this.saveModelsToolStripMenuItem_Click);
-            // 
-            // logToolStripMenuItem
-            // 
-            this.logToolStripMenuItem.Name = "logToolStripMenuItem";
-            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.logToolStripMenuItem.Text = "Log Debug Output";
-            this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -184,20 +189,6 @@
             this.quickAddModelButton.Text = "Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
-            // 
-            // ModelName
-            // 
-            this.ModelName.HeaderText = "Model";
-            this.ModelName.Name = "ModelName";
-            this.ModelName.ReadOnly = true;
-            this.ModelName.Width = 200;
-            // 
-            // ModelStatus
-            // 
-            this.ModelStatus.HeaderText = "Status";
-            this.ModelStatus.Name = "ModelStatus";
-            this.ModelStatus.ReadOnly = true;
-            this.ModelStatus.Width = 125;
             // 
             // MainForm
             // 
@@ -233,7 +224,6 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveModelsToolStripMenuItem;
         private System.Windows.Forms.Button quickAddModelButton;
-        private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartCtxMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeAllDisconnectedCtxMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;

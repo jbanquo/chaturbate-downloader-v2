@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using cb_downloader_v2.Utils;
+using log4net;
 
 namespace cb_downloader_v2
 {
     public partial class MainForm : Form
     {
         public static readonly string OutputFolderName = "Recordings";
+        private static readonly ILog Log = LogManager.GetLogger(typeof(MainForm));
         private static readonly string ModelsFileName = "models.txt";
         private IDownloaderProcessManager _manager;
         private ModelsGridWrapper models;
@@ -26,6 +28,7 @@ namespace cb_downloader_v2
             LoadModelsFile();
             CheckStreamlinkInstall();
             LoadModelNamesResourceFile();
+            Log.Info("Test");
         }
 
         private void CheckStreamlinkInstall()
@@ -33,6 +36,7 @@ namespace cb_downloader_v2
             if (!FileHelper.IsFileAccessible(Properties.Settings.Default.StreamlinkExecutable))
             {
                 var binary = Properties.Settings.Default.StreamlinkExecutable;
+                Log.Error($"Streamlink binary not found: {binary}");
                 MessageBox.Show(this, $"'{binary}' inaccessible, the application may fail to work properly.\r\n" +
                                       "Please ensure it is either in the current working directory, or in your system path variable.",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -76,8 +80,9 @@ namespace cb_downloader_v2
         public void RemoveInvalidUrlModel(string modelName)
         {
             // Telling user URL was invalid
+            Log.Warn($"Invalid model: {modelName}");
             Invoke((MethodInvoker)(() => MessageBox.Show(this, $"Unregistered model detected: {modelName}",
-                "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
+                "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)));
 
             // Removing from listeners
             if (_manager.RemoveModel(modelName))
@@ -165,11 +170,11 @@ namespace cb_downloader_v2
                 if (_manager.RemoveModel(modelName))
                 {
                     models.RemoveModel(modelName);
-                    Logger.Log(modelName, "Remove");
+                    Log.Debug($"{modelName}: Remove");
                 }
                 else
                 {
-                    Logger.Log(modelName, "Remove failed");
+                    Log.Debug($"{modelName}: Remove failed");
                 }
             }
         }
@@ -206,13 +211,6 @@ namespace cb_downloader_v2
             }
         }
 
-        private void logToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Toggle log to file
-            logToolStripMenuItem.Checked = !logToolStripMenuItem.Checked;
-            Logger.LogToFile = logToolStripMenuItem.Checked;
-        }
-
         private void restartToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (var modelName in models.SelectedModelNames)
@@ -226,12 +224,14 @@ namespace cb_downloader_v2
 
                 // Otherwise, continue with the manual start
                 listener.Start(true);
-                Logger.Log(modelName, "Manual restart");
+                Log.Debug($"{modelName}: Manual restart");
             }
         }
 
         private void removeAllUncheckedToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
+            Log.Debug($"Remove all disconnected");
+
             // Gather IDs
             var modelNames = models.ModelsWithStatus(Status.Disconnected);
 
@@ -248,7 +248,7 @@ namespace cb_downloader_v2
                 if (_manager.RemoveModel(modelName))
                 {
                     models.RemoveModel(modelName);
-                    Logger.Log(modelName, "Remove all disconnected");
+                    Log.Debug($"{modelName}: Remove all disconnected");
                 }
             }
         }

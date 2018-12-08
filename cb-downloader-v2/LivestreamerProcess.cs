@@ -7,13 +7,14 @@ using System.Management;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using cb_downloader_v2.Utils;
+using log4net;
 
 namespace cb_downloader_v2
 {
     public class LivestreamerProcess : IDownloaderProcess
     {
         // NOTE: issues occur when, i.e. you close the app and THEN a stream begins being listened to (i.e. this is not terminated), etc.
+        private static readonly ILog Log = LogManager.GetLogger(typeof(LivestreamerProcess));
         private static readonly Random Random = new Random();
         private static string StreamTerminatedMessage = "[cli][info] Stream ended";
         private static string StreamServiceUnavailablePart = "503 Server Error: Service Temporarily Unavailable";
@@ -21,12 +22,13 @@ namespace cb_downloader_v2
         private static string CommandArguments = "chaturbate.com/{0} {1} -o {2}";
         private static string FileNameTemplate = MainForm.OutputFolderName + "/{0}-{1}-{2}{3}.flv";
         private static string DefaultQuality = "best";
-        private static TimeSpan RestartDelay = TimeSpan.FromSeconds(10);
-        private static DateTimeOffset StandardRestartDelay => DateTimeOffset.UtcNow + RestartDelay;
+        private TimeSpan RestartDelay => TimeSpan.FromSeconds(Math.Max(_failures + 1, 6) * 10);
+        private DateTimeOffset StandardRestartDelay => DateTimeOffset.UtcNow + RestartDelay;
         private readonly MainForm _mf;
         private Status _status = Status.Disconnected;
         private CancellationTokenSource _cancelToken;
         private Process _process;
+        private int _failures;
         public string ModelName { get; }
         public Status Status
         {
@@ -66,7 +68,7 @@ namespace cb_downloader_v2
             if (_process != null)
                 return;
             Status = Status.Connecting;
-            Logger.Log(ModelName, $"Connecting in {delay}ms...");
+            Log.Debug($"{ModelName}: Connecting in {delay}ms");
 
             // Fetching file name
             _cancelToken = new CancellationTokenSource();
@@ -80,7 +82,19 @@ namespace cb_downloader_v2
 
                 // Create process
                 var quality = QualityOptions();
-                // TODO if stream does not exist, remove model
+
+                if (quality == null)
+                {
+                    Log.Debug($"{ModelName}: Disconnected (failed to retrieve quality options)");
+                    _failures++;
+                    Status = Status.Disconnected;
+                    RestartTime = StandardRestartDelay;
+                    return;
+                }
+
+                _failures = 0;
+                Log.Debug($"{ModelName}: Available qualities: {string.Join(",", quality)}");
+
                 var selectedQuality = SelectQuality(quality, Properties.Settings.Default.TargetQuality);
                 
                 _process = new Process
@@ -95,13 +109,13 @@ namespace cb_downloader_v2
                     }
                 };
 
-                // Updating flags and starting process
+                // Updating flags and start process
                 RestartRequired = false;
                 _process.OutputDataReceived += LivestreamerProcess_OutputDataReceived;
                 _process.Start();
                 _process.BeginOutputReadLine();
                 Status = Status.Connected;
-                Logger.Log(ModelName, "Started");
+                Log.Debug($"{ModelName}: Started (quality={selectedQuality}p)");
 
                 // Check if cancellation was called
                 if (_cancelToken.IsCancellationRequested)
@@ -111,7 +125,7 @@ namespace cb_downloader_v2
             }, _cancelToken.Token);
         }
 
-        private string SelectQuality(List<int> qualities, int targetQuality)
+        private static string SelectQuality(List<int> qualities, int targetQuality)
         {
             if (qualities == null || qualities.Count == 0)
                 return DefaultQuality;
@@ -166,52 +180,53 @@ namespace cb_downloader_v2
             var line = e.Data;
 
             // Checking if data is valid
-            if (line == null) {
-				Logger.Log(ModelName, "End of stream");
-
+            if (line == null)
+            {
                 if (Status != Status.Disconnected) // if a custom errors is fired before this, this becomes ignored
                 {
+                    Log.Debug($"{ModelName}: Disconnecting (End of stream)");
                     Terminate(true);
+                }
+                else
+                {
+                    Log.Debug($"{ModelName}: End of stream");
                 }
                 return;
 			}
 			
 			if (line.Length == 0)
 				return;
-            
+
             // Parsing line
-            Logger.Log(ModelName, "[raw]" + line);
+            Log.Debug($"{ModelName}: [RAW]: {line}");
 
             // Checking if the stream was terminated server-side
             if (line.Equals(StreamTerminatedMessage))
             {
-                Logger.Log(ModelName, "Terminated");
+                Log.Debug($"{ModelName}: Disconnecting (Terminated)");
                 Terminate(true);
             }
 
             // Checking if service is offline (i.e. being ddosed)
             if (line.Contains(StreamServiceUnavailablePart))
             {
-                Logger.Log(ModelName, "Service unavailable");
+                Log.Debug($"{ModelName}: Disconnecting (Service unavailable)");
                 Terminate(true, StandardRestartDelay);
             }
 
             // Checking if the username is invalid
             if (line.Contains(_streamInvalidUsernameMessage))
             {
-                Logger.Log(ModelName, "Invalid username (404)");
-
-                // Terminating the thread and marking it as an invalid url
+                Log.Debug($"{ModelName}: Disconnecting (HTTP404: Invalid username)");
+                
                 Terminate();
-
-                // Removing model from GUI
                 _mf.RemoveInvalidUrlModel(ModelName);
             }
 
             // Checking if stream is offline
             if (line.StartsWith(StreamOfflineMessagePart) || line.Contains(_streamReadTimeoutMessage))
             {
-                Logger.Log(ModelName, "Offline");
+                Log.Debug($"{ModelName}: Disconnecting (Stream offline)");
                 Terminate(true, StandardRestartDelay);
             }
         }
@@ -336,7 +351,13 @@ namespace cb_downloader_v2
 
         public bool CanRestart()
         {
-            return RestartRequired && Status == Status.Disconnected && DateTimeOffset.UtcNow >= RestartTime;
+            var restartable = RestartRequired && Status == Status.Disconnected && DateTimeOffset.UtcNow >= RestartTime;
+
+            if (restartable)
+            {
+                Log.Debug($"{ModelName}: Restartable (required={RestartRequired}, status={Status}, delay_ok={DateTimeOffset.UtcNow >= RestartTime})");
+            }
+            return restartable;
         }
     }
 }

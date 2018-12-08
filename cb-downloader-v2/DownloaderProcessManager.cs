@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using cb_downloader_v2.Utils;
+using log4net;
 
 namespace cb_downloader_v2
 {
     class DownloaderProcessManager : IDownloaderProcessManager
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(DownloaderProcessManager));
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
         private readonly MainForm _parent;
         private readonly ModelsGridWrapper _models;
@@ -26,12 +28,15 @@ namespace cb_downloader_v2
         
         public void Start()
         {
+            Log.Info("Starting...");
             _thread = new Thread(Tick);
             _thread.Start();
         }
 
         public void Stop()
         {
+            Log.Info("Stopping...");
+
             // Stop thread
             if (Running)
                 _thread.Abort();
@@ -39,8 +44,8 @@ namespace cb_downloader_v2
             // Stop all downloader processes
             foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
             {
-                string modelName = valuePair.Key;
-                IDownloaderProcess listener = valuePair.Value;
+                var modelName = valuePair.Key;
+                var listener = valuePair.Value;
 
                 // Initiate termination
                 listener.Terminate();
@@ -63,7 +68,6 @@ namespace cb_downloader_v2
                 {
                     var process = restartable[i];
                     var delay = (i + 1) * 500;
-                    Logger.Log(process.ModelName, $"Automated restart in {delay}ms");
                     process.Start(delay);
                 }
             }
@@ -89,7 +93,7 @@ namespace cb_downloader_v2
 
             // Quick start functionality (i.e. start listener immediately)
             process.Start(immediate);
-            Logger.Log(modelName, "Added");
+            Log.Info($"Added {modelName}");
         }
 
         public bool RemoveModel(string modelName)
@@ -111,8 +115,8 @@ namespace cb_downloader_v2
         
         public IDownloaderProcess this[string key]
         {
-            get { return _listeners[key]; }
-            set { _listeners[key] = value; }
+            get => _listeners[key];
+            set => _listeners[key] = value;
         }
     }
 }
