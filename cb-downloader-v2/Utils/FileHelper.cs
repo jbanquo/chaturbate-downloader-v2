@@ -3,7 +3,7 @@ using System.IO;
 
 namespace cb_downloader_v2.Utils
 {
-    class FileHelper
+    static class FileHelper
     {
         public static bool IsFileAccessible(string fileName)
         {
@@ -30,6 +30,7 @@ namespace cb_downloader_v2.Utils
             foreach (var path in values.Split(';'))
             {
                 var fullPath = Path.Combine(path, fileName);
+
                 if (File.Exists(fullPath))
                     return fullPath;
             }

@@ -29,77 +29,105 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.modelsBox = new System.Windows.Forms.CheckedListBox();
-            this.modelsBoxCtxMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.removeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeAllUncheckedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.modelsCtxMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.removeCtxMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restartCtxMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.removeAllDisconnectedCtxMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
+            this.modelsGrid = new System.Windows.Forms.DataGridView();
+            this.ModelName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ModelStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.modelNameTextBox = new System.Windows.Forms.TextBox();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.quickAddModelButton = new System.Windows.Forms.Button();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.modelsBoxCtxMenu.SuspendLayout();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quickAddModelButton = new System.Windows.Forms.Button();
+            this.modelsCtxMenu.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.modelsGrid)).BeginInit();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // modelsBox
+            // modelsCtxMenu
             // 
-            this.modelsBox.ContextMenuStrip = this.modelsBoxCtxMenu;
-            this.modelsBox.FormattingEnabled = true;
-            this.modelsBox.Location = new System.Drawing.Point(6, 19);
-            this.modelsBox.Name = "modelsBox";
-            this.modelsBox.Size = new System.Drawing.Size(387, 259);
-            this.modelsBox.Sorted = true;
-            this.modelsBox.TabIndex = 0;
-            this.modelsBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.modelsBox_ItemCheck);
+            this.modelsCtxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeCtxMenuItem,
+            this.restartCtxMenuItem,
+            this.toolStripMenuItem2,
+            this.removeAllDisconnectedCtxMenuItem});
+            this.modelsCtxMenu.Name = "modelsBoxCtxMenu";
+            this.modelsCtxMenu.ShowImageMargin = false;
+            this.modelsCtxMenu.Size = new System.Drawing.Size(185, 76);
+            this.modelsCtxMenu.Opening += new System.ComponentModel.CancelEventHandler(this.modelsBoxCtxMenu_Opening);
             // 
-            // modelsBoxCtxMenu
+            // removeCtxMenuItem
             // 
-            this.modelsBoxCtxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.removeMenuItem,
-            this.restartToolStripMenuItem,
-            this.removeAllUncheckedToolStripMenuItem});
-            this.modelsBoxCtxMenu.Name = "modelsBoxCtxMenu";
-            this.modelsBoxCtxMenu.ShowImageMargin = false;
-            this.modelsBoxCtxMenu.Size = new System.Drawing.Size(172, 70);
-            this.modelsBoxCtxMenu.Opening += new System.ComponentModel.CancelEventHandler(this.modelsBoxCtxMenu_Opening);
+            this.removeCtxMenuItem.Name = "removeCtxMenuItem";
+            this.removeCtxMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.removeCtxMenuItem.Text = "Remove";
+            this.removeCtxMenuItem.Click += new System.EventHandler(this.removeMenuItem_Click);
             // 
-            // removeMenuItem
+            // restartCtxMenuItem
             // 
-            this.removeMenuItem.Name = "removeMenuItem";
-            this.removeMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.removeMenuItem.Text = "Remove";
-            this.removeMenuItem.Click += new System.EventHandler(this.removeMenuItem_Click);
+            this.restartCtxMenuItem.Name = "restartCtxMenuItem";
+            this.restartCtxMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.restartCtxMenuItem.Text = "Restart";
+            this.restartCtxMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
             // 
-            // restartToolStripMenuItem
+            // toolStripMenuItem2
             // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
-            this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(181, 6);
             // 
-            // removeAllUncheckedToolStripMenuItem
+            // removeAllDisconnectedCtxMenuItem
             // 
-            this.removeAllUncheckedToolStripMenuItem.Name = "removeAllUncheckedToolStripMenuItem";
-            this.removeAllUncheckedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.removeAllUncheckedToolStripMenuItem.Text = "Remove All Unchecked";
-            this.removeAllUncheckedToolStripMenuItem.Click += new System.EventHandler(this.removeAllUncheckedToolStripMenuItem_Click_1);
+            this.removeAllDisconnectedCtxMenuItem.Name = "removeAllDisconnectedCtxMenuItem";
+            this.removeAllDisconnectedCtxMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.removeAllDisconnectedCtxMenuItem.Text = "Remove All Disconnected";
+            this.removeAllDisconnectedCtxMenuItem.Click += new System.EventHandler(this.removeAllUncheckedToolStripMenuItem_Click_1);
             // 
             // modelsGroupBox
             // 
-            this.modelsGroupBox.Controls.Add(this.modelsBox);
+            this.modelsGroupBox.Controls.Add(this.modelsGrid);
             this.modelsGroupBox.Location = new System.Drawing.Point(12, 27);
             this.modelsGroupBox.Name = "modelsGroupBox";
             this.modelsGroupBox.Size = new System.Drawing.Size(399, 292);
             this.modelsGroupBox.TabIndex = 1;
             this.modelsGroupBox.TabStop = false;
             this.modelsGroupBox.Text = "Models";
+            // 
+            // modelsGrid
+            // 
+            this.modelsGrid.AllowUserToAddRows = false;
+            this.modelsGrid.AllowUserToDeleteRows = false;
+            this.modelsGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.modelsGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ModelName,
+            this.ModelStatus});
+            this.modelsGrid.ContextMenuStrip = this.modelsCtxMenu;
+            this.modelsGrid.Location = new System.Drawing.Point(6, 19);
+            this.modelsGrid.Name = "modelsGrid";
+            this.modelsGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.modelsGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.modelsGrid.Size = new System.Drawing.Size(387, 267);
+            this.modelsGrid.TabIndex = 0;
+            // 
+            // ModelName
+            // 
+            this.ModelName.HeaderText = "Model";
+            this.ModelName.Name = "ModelName";
+            this.ModelName.ReadOnly = true;
+            this.ModelName.Width = 200;
+            // 
+            // ModelStatus
+            // 
+            this.ModelStatus.HeaderText = "Status";
+            this.ModelStatus.Name = "ModelStatus";
+            this.ModelStatus.ReadOnly = true;
+            this.ModelStatus.Width = 125;
             // 
             // modelNameTextBox
             // 
@@ -126,7 +154,6 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveModelsToolStripMenuItem,
-            this.logToolStripMenuItem,
             this.toolStripMenuItem1,
             this.settingsToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -141,12 +168,17 @@
             this.saveModelsToolStripMenuItem.Text = "Save Models...";
             this.saveModelsToolStripMenuItem.Click += new System.EventHandler(this.saveModelsToolStripMenuItem_Click);
             // 
-            // logToolStripMenuItem
+            // toolStripMenuItem1
             // 
-            this.logToolStripMenuItem.Name = "logToolStripMenuItem";
-            this.logToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.logToolStripMenuItem.Text = "Log Debug Output";
-            this.logToolStripMenuItem.Click += new System.EventHandler(this.logToolStripMenuItem_Click);
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(186, 6);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.settingsToolStripMenuItem.Text = "Settings...";
+            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // quickAddModelButton
             // 
@@ -157,18 +189,6 @@
             this.quickAddModelButton.Text = "Add";
             this.quickAddModelButton.UseVisualStyleBackColor = true;
             this.quickAddModelButton.Click += new System.EventHandler(this.quickAddModelButton_Click);
-            // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.settingsToolStripMenuItem.Text = "Settings...";
-            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(186, 6);
             // 
             // MainForm
             // 
@@ -185,8 +205,9 @@
             this.Name = "MainForm";
             this.Text = "cb-downloader-2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.modelsBoxCtxMenu.ResumeLayout(false);
+            this.modelsCtxMenu.ResumeLayout(false);
             this.modelsGroupBox.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.modelsGrid)).EndInit();
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
@@ -195,21 +216,22 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.CheckedListBox modelsBox;
         private System.Windows.Forms.GroupBox modelsGroupBox;
         private System.Windows.Forms.TextBox modelNameTextBox;
-        private System.Windows.Forms.ContextMenuStrip modelsBoxCtxMenu;
-        private System.Windows.Forms.ToolStripMenuItem removeMenuItem;
+        private System.Windows.Forms.ContextMenuStrip modelsCtxMenu;
+        private System.Windows.Forms.ToolStripMenuItem removeCtxMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveModelsToolStripMenuItem;
         private System.Windows.Forms.Button quickAddModelButton;
-        private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem removeAllUncheckedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restartCtxMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeAllDisconnectedCtxMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.DataGridView modelsGrid;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ModelName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ModelStatus;
     }
 }
 

@@ -3,37 +3,40 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 using cb_downloader_v2.Utils;
+using log4net;
 
 namespace cb_downloader_v2
 {
     class DownloaderProcessManager : IDownloaderProcessManager
     {
-        public static DateTime TimeNow = DateTime.Now;
+        private static readonly ILog Log = LogManager.GetLogger(typeof(DownloaderProcessManager));
         private readonly ConcurrentDictionary<string, IDownloaderProcess> _listeners = new ConcurrentDictionary<string, IDownloaderProcess>();
+        private readonly MainForm _parent;
+        private readonly ModelsGridWrapper _models;
         private Thread _thread;
-        private MainForm _parent;
-        private ListBox _modelsBox;
 
         public bool Running => _thread != null && _thread.IsAlive;
         public int Count => _listeners.Count;
-        public int TickSleepDelay = 60 * 100;
+        public TimeSpan TickSleepDelay = TimeSpan.FromSeconds(2.5);
 
-        public DownloaderProcessManager(MainForm parent, ListBox modelsBox)
+        public DownloaderProcessManager(MainForm parent, ModelsGridWrapper models)
         {
             _parent = parent;
-            _modelsBox = modelsBox;
+            _models = models;
         }
         
         public void Start()
         {
+            Log.Info("Starting...");
             _thread = new Thread(Tick);
             _thread.Start();
         }
 
         public void Stop()
         {
+            Log.Info("Stopping...");
+
             // Stop thread
             if (Running)
                 _thread.Abort();
@@ -41,15 +44,14 @@ namespace cb_downloader_v2
             // Stop all downloader processes
             foreach (KeyValuePair<string, IDownloaderProcess> valuePair in _listeners)
             {
-                string modelName = valuePair.Key;
-                IDownloaderProcess listener = valuePair.Value;
+                var modelName = valuePair.Key;
+                var listener = valuePair.Value;
 
                 // Initiate termination
                 listener.Terminate();
 
                 // Remove listener from list
-                IDownloaderProcess output;
-                _listeners.TryRemove(modelName, out output);
+                _listeners.TryRemove(modelName, out var output);
             }
         }
 
@@ -59,14 +61,14 @@ namespace cb_downloader_v2
             {
                 Thread.Sleep(TickSleepDelay);
 
-                // Update cached time
-                TimeNow = DateTime.Now;
+                // Restart processes
+                var restartable = _listeners.Values.Where(p => p.CanRestart()).ToList();
 
-                // Restart processes where necessary
-                foreach (IDownloaderProcess process in _listeners.Values
-                    .Where(p => p.CanRestart()))
+                for (var i = 0; i < restartable.Count; i++)
                 {
-                    process.Start();
+                    var process = restartable[i];
+                    var delay = (i + 1) * 500;
+                    process.Start(delay);
                 }
             }
         }
@@ -81,23 +83,22 @@ namespace cb_downloader_v2
                 return;
             
             // Check if the model is already being listened to
-            if (_modelsBox.Items.Cast<object>().Contains(modelName))
+            if (_models.Contains(modelName))
                 return;
 
             // Create process and add listener to lists
-            IDownloaderProcess proc = new LivestreamerProcess(_parent, modelName);
-            _modelsBox.Items.Add(modelName);
-            _listeners.AddOrUpdate(modelName, proc, (s, listener) => listener);
+            IDownloaderProcess process = new LivestreamerProcess(_parent, modelName);
+            _models.AddModel(modelName);
+            _listeners.AddOrUpdate(modelName, process, (s, listener) => listener);
 
             // Quick start functionality (i.e. start listener immediately)
-            proc.Start(immediate);
-            Logger.Log(modelName, "Added");
+            process.Start(immediate);
+            Log.Info($"Added {modelName}");
         }
 
         public bool RemoveModel(string modelName)
         {
-            IDownloaderProcess output;
-            return _listeners.TryRemove(modelName, out output);
+            return _listeners.TryRemove(modelName, out var output);
         }
 
         public string NormaliseModelName(string modelName)
@@ -114,8 +115,8 @@ namespace cb_downloader_v2
         
         public IDownloaderProcess this[string key]
         {
-            get { return _listeners[key]; }
-            set { _listeners[key] = value; }
+            get => _listeners[key];
+            set => _listeners[key] = value;
         }
     }
 }

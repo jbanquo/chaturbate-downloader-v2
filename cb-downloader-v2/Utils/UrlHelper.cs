@@ -2,7 +2,7 @@
 
 namespace cb_downloader_v2.Utils
 {
-    public class UrlHelper
+    public static class UrlHelper
     {
         private static readonly Regex ChaturbateLinkRegex = new Regex(@"^(https?:\/\/)?chaturbate\.com\/[\da-zA-Z_]+\/?$");
         private static readonly Regex UniversalChaturbateLinkRegex = new Regex(@"^(https?:\/\/)?(ar|de|en|el|es|fr|hi|it|ja|ko|nl|pt|ru|tr|zh)\.chaturbate\.com\/[\da-zA-Z_]+\/?$");

@@ -3,19 +3,16 @@ using System.Reflection;
 
 namespace cb_downloader_v2.Utils
 {
-    class EmbeddedResourceHelper
+    static class EmbeddedResourceHelper
     {
         public static string ReadText(string fileName)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            string result;
-
-            using (Stream stream = assembly.GetManifestResourceStream(fileName))
-            using (StreamReader reader = new StreamReader(stream))
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(fileName);
+            
+            using (var reader = new StreamReader(stream))
             {
-                result = reader.ReadToEnd();
+                return reader.ReadToEnd();
             }
-            return result;
         }
     }
 }
